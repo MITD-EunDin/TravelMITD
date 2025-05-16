@@ -1,0 +1,227 @@
+.tour-container {
+  width: 100%;
+  /* Đảm bảo container chiếm hết chiều rộng của Outlet */
+  overflow-x: auto;
+  /* Thanh cuộn ngang chỉ xuất hiện khi cần */
+}
+
+.tour-header {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tour-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.tour-add {
+  width: 40px;
+  height: 40px;
+  margin-left: 30px;
+}
+
+.tour-refesh {
+  display: flex;
+  background-color: white;
+  align-items: center;
+  border-radius: 15px;
+  width: 100px;
+  padding-left: 10px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.tour-refesh text {
+  margin-left: 5px;
+  opacity: 0.5;
+}
+
+.tour-search {
+  width: 750px;
+  height: 50px;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  background-color: #C4DFFF;
+  gap: 70px;
+  align-items: center;
+  border-radius: 25px;
+  border: 1px solid black;
+  padding-left: 15px;
+}
+
+.tour-input {
+  border: none;
+  background-color: #C4DFFF;
+  width: 500px;
+}
+
+.tour-input:focus {
+  outline: none;
+  background-color: #C4DFFF;
+  border: none;
+}
+
+.tour-search img {
+  height: 25px;
+  width: 25px;
+}
+
+.tour-header-bottom {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.tour-select {
+  border-radius: 15px;
+  width: 150px;
+  height: 40px;
+  padding-left: 10px;
+  cursor: pointer;
+}
+
+.tour-sort-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 4px;
+}
+
+.tour-table-wrapper {
+  width: 100%;
+  overflow-y: auto;
+  /* Cuộn dọc khi cần */
+  overflow-x: auto;
+  /* Cuộn ngang khi cần */
+  margin-top: 20px;
+}
+
+.tour-table {
+  width: auto;
+  /* Chiều rộng tự điều chỉnh theo nội dung */
+  min-width: 100%;
+  /* Đảm bảo bảng ít nhất bằng container cha */
+  border-collapse: collapse;
+  text-align: center;
+  background-color: white;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.tour-table thead {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+}
+
+.tour-table th,
+.tour-table td {
+  padding: 8px 12px;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+}
+
+.tour-table th:first-child {
+  border-top-left-radius: 15px;
+}
+
+.tour-table th:last-child {
+  border-top-right-radius: 15px;
+}
+
+.tour-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+.tour-image {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.tour-image-placeholder {
+  width: 60px;
+  height: 40px;
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.tour-table td:nth-child(2),
+.tour-table th:nth-child(2) {
+  max-width: 250px;
+  min-width: 200px;
+  word-wrap: break-word;
+  white-space: normal;
+  text-align: left;
+}
+
+td.action-buttons {
+  display: flex;
+  justify-content: start;
+  gap: 10px;
+}
+
+/* Định dạng chung cho các nút hành động */
+button.action-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  /* Xóa border của nút */
+  outline: none;
+}
+
+/* Nút "Sửa" */
+button.edit-btn {
+  background-color: #4CAF50;
+  /* Xanh lá cho nút sửa */
+}
+
+button.edit-btn:hover {
+  background-color: #45a049;
+  /* Màu xanh đậm khi hover */
+}
+
+button.edit-btn:active {
+  transform: scale(0.95);
+  /* Tạo hiệu ứng khi nhấn nút */
+}
+
+/* Nút "Xoá" */
+button.delete-btn {
+  background-color: #f44336;
+  /* Đỏ cho nút xoá */
+}
+
+button.delete-btn:hover {
+  background-color: #e53935;
+  /* Màu đỏ đậm khi hover */
+}
+
+button.delete-btn:active {
+  transform: scale(0.95);
+  /* Tạo hiệu ứng khi nhấn nút */
+}
+
+/* Thêm hiệu ứng shadow nhẹ */
+button.action-btn:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Thêm chút khoảng cách giữa các nút */
+button.ml-2 {
+  margin-left: 10px;
+}

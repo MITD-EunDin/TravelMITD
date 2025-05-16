@@ -1,0 +1,79 @@
+/* Tổng thể container */
+.setting-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Các tab */
+.setting-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.setting-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    margin: 0 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.setting-tab:hover {
+    background-color: #dcdcdc;
+}
+
+.setting-tab.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.tab-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+/* Card cho mỗi tab */
+.setting-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.setting-content .tab-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: none;
+}
+
+.setting-content .tab-card.active {
+    display: block;
+}
+
+/* Nếu muốn có hiệu ứng hover cho card */
+.setting-content .tab-card:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}

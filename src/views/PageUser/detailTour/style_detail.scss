@@ -1,0 +1,197 @@
+.page-container {
+  padding: 20px;
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .homepage-img img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .detail-trip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+
+    .detail-1 {
+      flex: 1.5;
+
+      .img-parent {
+        width: 100%;
+        height: 300px;
+        border-radius: 10px;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .img-chld {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+
+        li {
+          list-style: none;
+          cursor: pointer;
+          border: 2px solid transparent;
+          border-radius: 8px;
+          overflow: hidden;
+
+          &.active {
+            border-color: #3b82f6;
+          }
+
+          img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            transition: transform 0.3s;
+
+            &:hover {
+              transform: scale(1.05);
+            }
+          }
+        }
+      }
+    }
+
+    .detail-2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      h1 {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      ul {
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        li {
+          display: flex;
+          justify-content: space-between;
+          font-size: 16px;
+
+          span:first-child {
+            font-weight: 600;
+            color: #333;
+          }
+
+          span:last-child {
+            color: #555;
+          }
+        }
+      }
+
+      div {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        // span:not(.no-style) {
+        //   font-size: 18px;
+        //   font-weight: 600;
+        // }
+
+        button {
+          background-color: #3b82f6;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+
+          &:hover {
+            background-color: #2563eb;
+          }
+        }
+
+        .linkto {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+
+  .description-tip {
+    .button-describe {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.3s;
+
+        &.active,
+        &:hover {
+          background-color: #3b82f6;
+          color: white;
+        }
+      }
+    }
+
+    .space-content {
+      .content-tab {
+        display: none;
+
+        &.active {
+          display: block;
+        }
+
+        h3 {
+          font-size: 22px;
+          margin-bottom: 10px;
+          color: #1f2937;
+        }
+
+        p {
+          font-size: 16px;
+          line-height: 1.6;
+          color: #4b5563;
+          white-space: pre-line;
+        }
+
+        // 🌟 Phần đánh giá được format xịn xò ở đây:
+        .review-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+
+          .review-item {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #3b82f6;
+
+            p {
+              margin: 0;
+              color: #444;
+              line-height: 1.5;
+              font-style: italic;
+            }
+          }
+        }
+      }
+    }
+  }
+}

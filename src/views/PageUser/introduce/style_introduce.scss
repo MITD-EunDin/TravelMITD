@@ -1,0 +1,290 @@
+// @import "../../../styles/style.scss";
+// style_introduce.scss
+$theme-color : ("main" : #071635,
+  "hover" : #ED504E,
+  "text_black" : #333333,
+  "text_blue" : #7AB2F7,
+  "text_silver" : #757575,
+  "background" : #f7f7f7,
+  "weak_red" : #EA5652,
+  "blue_weight" : #4581BA,
+);
+
+// Variables
+$primary-color: #0066cc;
+$secondary-color: #ff9900;
+$text-color: #333333;
+$light-color: #ffffff;
+$dark-color: #000000;
+$background-color: #f5f5f5;
+$border-color: #dddddd;
+$heading-font: 'Roboto', sans-serif;
+$body-font: 'Open Sans', sans-serif;
+
+
+.company-slogan {
+  color: map-get($theme-color, "weak_red");
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.company-name {
+  color: map-get($theme-color, "blue_weight");
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0px;
+}
+
+.section-heading {
+  color: map-get($theme-color, "weak_red");
+  border-bottom: 3px solid map-get($theme-color, "text_black");
+  padding-bottom: 10px;
+}
+
+// Content sections
+.introduce-content {
+
+  .section-title {
+    position: relative;
+    font-family: $heading-font;
+    font-weight: 700;
+    color: $primary-color;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background-color: $secondary-color;
+    }
+
+    font-size: 1.5rem;
+  }
+
+  // Company info section
+  .company-info {
+    padding: 2rem;
+    margin-bottom: 2rem;
+    background-color: $light-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .info-list {
+      list-style-type: none;
+      padding: 0;
+
+      li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid $border-color;
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+
+  // Headquarters section
+  .headquarters {
+    padding: 2rem;
+    margin-bottom: 2rem;
+    background-color: $light-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .contact-info {
+      list-style-type: none;
+      padding: 0;
+
+      li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+
+        &:before {
+          content: '•';
+          color: $secondary-color;
+          font-weight: bold;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+
+  // Branches section
+  .branches {
+    padding: 2rem;
+    margin-bottom: 2rem;
+    background-color: $light-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .branch-item {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px dashed $border-color;
+
+      &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .branch-name {
+        font-weight: 600;
+        color: $primary-color;
+        margin-bottom: 0.5rem;
+      }
+
+      .branch-info {
+        list-style-type: none;
+        padding-left: 1rem;
+
+        li {
+          padding: 0.3rem 0;
+        }
+      }
+    }
+  }
+
+  // Vision and Mission section
+  .vision-mission {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+
+    .vision,
+    .mission {
+      padding: 2rem;
+      margin-bottom: 2rem;
+      background-color: $light-color;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .vision-list,
+    .mission-list {
+      padding-left: 1.5rem;
+
+      li {
+        margin-bottom: 1rem;
+        position: relative;
+
+        &:before {
+          content: '✓';
+          color: $secondary-color;
+          position: absolute;
+          left: -1.5rem;
+        }
+      }
+    }
+  }
+
+  // Services section
+  .services {
+    padding: 2rem;
+    margin-bottom: 2rem;
+    background-color: $light-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .achievement-intro {
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: $primary-color;
+    }
+
+    .services-list {
+      list-style-type: none;
+      padding: 0;
+
+      li {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid $border-color;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        strong {
+          display: block;
+          color: $primary-color;
+          font-size: 1.1rem;
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+
+  // Company story section
+  .company-story {
+    padding: 2rem;
+    margin-bottom: 2rem;
+    background-color: $light-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .company-description {
+      p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .introduce-header {
+    .introduce-banner {
+      height: 200px;
+    }
+
+    .introduce-title {
+      .company-name {
+        font-size: 1.8rem;
+      }
+
+      .company-slogan {
+        font-size: 1.4rem;
+      }
+    }
+  }
+
+  .vision-mission {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .introduce-container {
+    padding: 1rem;
+  }
+
+  .introduce-content {
+    section {
+      padding: 1.5rem;
+    }
+  }
+
+  .introduce-header {
+    .introduce-title {
+      .company-name {
+        font-size: 1.5rem;
+      }
+
+      .company-slogan {
+        font-size: 1.2rem;
+      }
+    }
+  }
+}
