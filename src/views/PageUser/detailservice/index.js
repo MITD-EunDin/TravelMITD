@@ -1,6 +1,7 @@
 import { memo, useState, useRef, useEffect } from "react";
-import img2 from "../../../assets/celebratetour.png";
 import { User, TreePalm } from "lucide-react";
+
+import "./style_dtservice.scss";
 
 const DetailService = () => {
   const [regionDropdown, setRegionDropdown] = useState(false);
@@ -31,47 +32,39 @@ const DetailService = () => {
   }, [regionRef]);
 
   return (
-    <div className="">
-      <div className="max-w-[1200px] w-full mx-auto bg-[#f7f7f7] py-5 px-4">
-        <div className="w-full mb-8">
-          <img src={img2} alt="" className="w-full" />
+    <div className="page-container">
+      <div className="grid">
+        <div className="homepage-img">
+          <img src={""} alt="" />
         </div>
-        <h1 className="text-[2rem] text-[#4581BA] flex justify-center mb-5">
-          Vui lòng hoàn thành mẫu
-        </h1>
-        <div className="max-w-[800px] mx-auto bg-white p-6 rounded-xl shadow">
-          {/* Thông tin khách hàng */}
-          <div className="bg-[#f9f9f9] p-5 rounded-lg mb-5 shadow">
-            <div className="flex items-center font-bold text-[#555] mb-4 text-lg">
-              <User className="mr-2" />
+        <h1>Vui lòng hoàn thành mẫu</h1>
+        <div className="from-container">
+          <div className="form-1">
+            <div className="form-section-title">
+              <User />
               <span>Thông tin khách hàng</span>
             </div>
-            <div className="flex flex-col md:flex-row justify-between gap-6">
-              {/* Cột 1 */}
-              <ul className="list-none p-0 m-0 space-y-3">
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Họ và tên</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
+            <div className="form-fields gap-4">
+              <ul className="input-column">
+                <li>
+                  <span>Họ và tên</span>
+                  <input type="text" />
                 </li>
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Email</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
+                <li>
+                  <span>Email</span>
+                  <input type="text" />
                 </li>
-                <li ref={regionRef} className="relative flex flex-col">
-                  <text className="text-[#757575] pb-1">Chọn vùng</text>
-                  <span
-                    onClick={handleRegionClick}
-                    className="cursor-pointer p-2 border border-gray-300 rounded-md"
-                  >
+                <li ref={regionRef} className="region-dropdown">
+                  <text>Chọn vùng</text>
+                  <span onClick={handleRegionClick}>
                     Khu vực {selectedRegion && `: ${selectedRegion}`}
                   </span>
                   {regionDropdown && (
-                    <ul className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow z-10">
+                    <ul className="region-list">
                       {regions.map((region) => (
                         <li
                           key={region}
                           onClick={() => handleRegionSelect(region)}
-                          className="p-2 hover:bg-gray-100 cursor-pointer"
                         >
                           {region}
                         </li>
@@ -80,65 +73,57 @@ const DetailService = () => {
                   )}
                 </li>
               </ul>
-
-              {/* Cột 2 */}
-              <ul className="list-none p-0 m-0 space-y-3">
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Điện thoại</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
+              <ul className="input-column">
+                <li>
+                  <span>Điện thoại</span>
+                  <input type="text" />
                 </li>
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Căn cước công dân</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
+                <li>
+                  <span>Căn cước công dân</span>
+                  <input type="text" />
                 </li>
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Địa chỉ</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
+                <li>
+                  <span>Địa chỉ</span>
+                  <input type="text" />
                 </li>
               </ul>
             </div>
           </div>
-
-          {/* Tour yêu cầu */}
-          <div className="bg-[#f9f9f9] p-5 rounded-lg shadow mb-5">
-            <div className="flex items-center font-bold text-[#555] mb-4 text-lg">
-              <TreePalm className="mr-2" />
+          <div className="form-2">
+            <div className="form-section-title">
+              <TreePalm />
               <span>Tour yêu cầu</span>
             </div>
-            <div className="mb-4">
-              <span className="block mb-1 text-[#666]">Mô tả</span>
-              <input
-                type="text"
-                className="w-full h-[200px] p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div className="flex flex-col md:flex-row justify-between gap-6">
-              <ul className="list-none p-0 m-0 space-y-3">
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Ngày khởi hành</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
-                </li>
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Số lượng người</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
-                </li>
-              </ul>
-              <ul className="list-none p-0 m-0 space-y-3">
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Ngày kết thúc</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
-                </li>
-                <li className="flex flex-col">
-                  <span className="mb-1 text-[#757575]">Số trẻ em</span>
-                  <input type="text" className="p-2 w-[300px] border border-gray-300 rounded-md" />
-                </li>
-              </ul>
+            <div className="form-field-2">
+              <div className="form-description">
+                <span>Mô tả</span>
+                <input type="text" />
+              </div>
+              <div className="form-fields">
+                <ul className="input-column">
+                  <li>
+                    <span>Ngày khởi hành</span>
+                    <input type="text" />
+                  </li>
+                  <li>
+                    <span>Số lượng người</span>
+                    <input type="text" />
+                  </li>
+                </ul>
+                <ul className="input-column">
+                  <li>
+                    <span>Ngày kết thúc</span>
+                    <input type="text" />
+                  </li>
+                  <li>
+                    <span>Số trẻ em</span>
+                    <input type="text" />
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-
-          <button className="w-full bg-[#007bff] hover:bg-[#0056b3] text-white py-2 px-4 rounded-md text-lg transition">
-            Gửi đi
-          </button>
+          <button className="submit-button">Gửi đi</button>
         </div>
       </div>
     </div>

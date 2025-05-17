@@ -1,8 +1,6 @@
-// src/context/ToursContext.js
 import { createContext, useState, useEffect } from "react";
 import { getAllTours } from "../api/TourApi";
-import { db } from "../firebase/firebaseConfig";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import axios from "axios";
 
 export const ToursContext = createContext();
 
@@ -13,7 +11,10 @@ export const ToursProvider = ({ children }) => {
     useEffect(() => {
         const fetchToursAndReviews = async () => {
             try {
-                // Fetch tours từ API
+                // Lấy token từ localStorage
+                const token = localStorage.getItem("token");
+
+                // Fetch tour cố định từ API
                 const tourData = await getAllTours();
                 console.log("Raw API data in ToursContext:", tourData);
 
@@ -22,39 +23,42 @@ export const ToursProvider = ({ children }) => {
                     return;
                 }
 
-                // Khởi tạo tours với averageRating mặc định là 0
+                // Khởi tạo tours với averageRating mặc định là 5.0
                 const toursWithRating = tourData.map((tour) => ({
                     ...tour,
-                    averageRating: 0,
+                    averageRating: 5.0,
                 }));
 
-                // Fetch đánh giá từ Firestore cho tất cả tour
+                // Fetch đánh giá từ API cho tất cả tour
                 const updatedTours = await Promise.all(
                     toursWithRating.map(async (tour) => {
                         try {
-                            const reviewsQuery = query(
-                                collection(db, `tours/${tour.tourId}/reviews`),
-                                orderBy("createdAt", "desc"),
-                                limit(10)
+                            const response = await axios.get(
+                                `http://localhost:8080/reviews/${tour.tourId}`,
+                                {
+                                    params: { limit: 10 },
+                                    headers: {
+                                        Authorization: token ? `Bearer ${token}` : undefined,
+                                    },
+                                }
                             );
-                            const querySnapshot = await getDocs(reviewsQuery);
-                            const reviewData = querySnapshot.docs.map((doc) => ({
-                                id: doc.id,
-                                ...doc.data(),
-                            }));
+                            const reviewData = response.data.result || [];
                             console.log(`Reviews fetched for tour ${tour.tourId}:`, reviewData);
 
                             // Tính averageRating
                             const averageRating = reviewData.length
-                                ? (reviewData.reduce((sum, r) => sum + r.rating, 0) / reviewData.length).toFixed(1)
-                                : "0.0";
+                                ? (
+                                    reviewData.reduce((sum, r) => sum + r.rating, 0) /
+                                    reviewData.length
+                                ).toFixed(1)
+                                : "5.0"; // 5 sao nếu không có đánh giá
                             return {
                                 ...tour,
                                 averageRating: parseFloat(averageRating),
                             };
                         } catch (error) {
                             console.error(`Lỗi khi lấy đánh giá cho tour ${tour.tourId}:`, error);
-                            return tour; // Giữ nguyên tour nếu lỗi
+                            return tour; // Giữ averageRating 5.0 nếu lỗi
                         }
                     })
                 );
@@ -63,6 +67,10 @@ export const ToursProvider = ({ children }) => {
                 console.log("Tours with ratings in ToursContext:", updatedTours);
             } catch (err) {
                 console.error("Lỗi load tour:", err);
+                if (err.response?.status === 401) {
+                    alert("Vui lòng đăng nhập để xem danh sách tour!");
+                    window.location.href = "/login";
+                }
             }
         };
 
@@ -73,11 +81,10 @@ export const ToursProvider = ({ children }) => {
     const updateTourRating = (tourId, averageRating) => {
         if (!tourId) return;
         setTours((prevTours) => {
-            // Kiểm tra nếu averageRating không thay đổi
             const tour = prevTours.find((t) => t.tourId === tourId);
             if (tour && tour.averageRating === averageRating) {
                 console.log("No change in averageRating for tour:", tourId, averageRating);
-                return prevTours; // Không cập nhật state
+                return prevTours;
             }
             const newTours = prevTours.map((tour) =>
                 tour.tourId === tourId ? { ...tour, averageRating } : tour
@@ -88,9 +95,41 @@ export const ToursProvider = ({ children }) => {
         });
     };
 
+    // Hàm thêm đánh giá mới
+    const addReview = async (tourId, reviewData) => {
+        try {
+            const token = localStorage.getItem("token");
+            // Gửi đánh giá mới
+            const response = await axios.post(`http://localhost:8080/reviews/${tourId}`, reviewData, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            });
+            console.log("Review created:", response.data.result);
+
+            // Lấy lại danh sách đánh giá để tính averageRating mới
+            const reviewsResponse = await axios.get(`http://localhost:8080/reviews/${tourId}`, {
+                params: { limit: 10 },
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            });
+            const reviewList = reviewsResponse.data.result || [];
+            const averageRating = reviewList.length
+                ? (reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length).toFixed(1)
+                : "5.0"; // 5 sao nếu không có đánh giá
+
+            // Cập nhật averageRating
+            updateTourRating(tourId, parseFloat(averageRating));
+        } catch (error) {
+            console.error("Lỗi khi thêm đánh giá:", error);
+            throw error;
+        }
+    };
+
     return (
-        <ToursContext.Provider value={{ tours, updateTourRating }}>
+        <ToursContext.Provider value={{ tours, updateTourRating, addReview }}>
             {children}
         </ToursContext.Provider>
     );
-};
+};  

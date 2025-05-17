@@ -1,62 +1,61 @@
 import { memo, useState, useEffect } from "react";
-import { User } from "lucide-react";
-import { NavLink } from "react-router-dom";
-import { Form, Input, Button, DatePicker, Spin, message } from "antd";
+import { UserCircle2, Mail, Phone, MapPin, Calendar, IdCard } from "lucide-react";
+import { Button, message, Spin } from "antd";
 import { getMyInfo, updateUser } from "../../../api/Api";
 import dayjs from "dayjs";
-import './userprofile.scss';
 
 // Component UserProfile để hiển thị và chỉnh sửa thông tin người dùng
 const UserProfile = () => {
-    const [userInfo, setUserInfo] = useState({});
+    const [userInfo, setUserInfo] = useState({
+        username: "",
+        email: "",
+        fullname: "",
+        phone: "",
+        address: "",
+        dateOfBirth: "",
+        citizenId: "",
+        avatar: "",
+    });
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [file, setFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null); // Lưu URL preview ảnh
     const [isEditing, setIsEditing] = useState(false); // Kiểm soát chế độ chỉnh sửa
-    const [form] = Form.useForm();
+
     const token = localStorage.getItem("token");
 
     // Lấy thông tin người dùng từ API
     useEffect(() => {
         const fetchUserInfo = async () => {
             if (!token) {
-                message.error("Vui lòng đăng nhập để xem thông tin.");
-                console.log("Thiếu token trong useEffect");
+                setError("Vui lòng đăng nhập để xem thông tin.");
+                setLoading(false);
                 return;
             }
             try {
                 setLoading(true);
                 const data = await getMyInfo(token);
-                console.log("Dữ liệu người dùng từ /users/myInfo:", JSON.stringify(data, null, 2));
+                console.log("UserProfile - API response:", JSON.stringify(data, null, 2));
                 if (!data || !data.id) {
-                    throw new Error("Không tìm thấy ID người dùng trong dữ liệu trả về");
+                    throw new Error("Không tìm thấy thông tin người dùng");
                 }
                 setUserInfo(data);
-                // Điền dữ liệu vào form
-                form.setFieldsValue({
-                    fullname: data.fullname,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address,
-                    citizenId: data.citizenId,
-                    dateOfBirth: data.dateOfBirth ? dayjs(data.dateOfBirth) : null,
-                });
             } catch (error) {
                 console.error("Lỗi khi lấy thông tin người dùng:", error);
-                message.error("Không thể lấy thông tin người dùng. Vui lòng thử lại.");
+                setError(error.message || "Không thể lấy thông tin người dùng. Vui lòng thử lại.");
             } finally {
                 setLoading(false);
             }
         };
         fetchUserInfo();
-    }, [token, form]);
+    }, [token]);
 
     // Xử lý chọn file ảnh
     const handleImageChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
             setFile(selectedFile);
-            setPreviewUrl(URL.createObjectURL(selectedFile)); // Cập nhật URL preview
+            setPreviewUrl(URL.createObjectURL(selectedFile));
         }
     };
 
@@ -70,17 +69,10 @@ const UserProfile = () => {
         setLoading(true);
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "avatar"); // Preset chính
-        formData.append("folder", "avatars"); // Lưu vào thư mục avatars
+        formData.append("upload_preset", "avatar");
+        formData.append("folder", "avatars");
 
         try {
-            // Debug: Log formData entries
-            console.log("FormData entries:");
-            for (let pair of formData.entries()) {
-                console.log(`${pair[0]}: ${pair[1]}`);
-            }
-
-            // Upload ảnh lên Cloudinary
             const response = await fetch(
                 "https://api.cloudinary.com/v1_1/duydoyrpb/image/upload",
                 {
@@ -106,21 +98,28 @@ const UserProfile = () => {
         }
     };
 
-    // Xử lý submit form
-    const onFinish = async (values) => {
-        console.log("Hàm onFinish được gọi với values:", JSON.stringify(values, null, 2));
+    // Xử lý submit chỉnh sửa thông tin
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         if (!token) {
             message.error("Vui lòng đăng nhập để cập nhật thông tin.");
-            console.log("Thiếu token trong onFinish");
+            setLoading(false);
             return;
         }
 
         if (!userInfo.id) {
             message.error("Không tìm thấy ID người dùng. Vui lòng thử lại.");
-            console.log("Thiếu userInfo.id trong onFinish");
             setLoading(false);
             return;
         }
+
+        const formData = new FormData(e.target);
+        const values = Object.fromEntries(formData.entries());
+        const payload = {
+            ...values,
+            dateOfBirth: values.dateOfBirth ? dayjs(values.dateOfBirth).format("YYYY-MM-DD") : null,
+            role: userInfo.roles ? userInfo.roles[0] : "USER",
+        };
 
         setLoading(true);
         try {
@@ -129,33 +128,21 @@ const UserProfile = () => {
                 console.log("Đang upload ảnh lên Cloudinary...");
                 avatarUrl = await handleUpload();
                 if (!avatarUrl) {
-                    console.log("Upload ảnh thất bại, dừng xử lý");
                     setLoading(false);
-                    return; // Dừng nếu upload ảnh thất bại
+                    return;
                 }
             }
 
-            // Chuẩn bị payload cho API
-            const payload = {
-                ...values,
-                dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format("YYYY-MM-DD") : null,
-                avatar: avatarUrl,
-                role: userInfo.roles ? userInfo.roles[0] : "USER", // Thêm role để khớp với updateUser
-            };
+            payload.avatar = avatarUrl;
             console.log("Payload gửi đến updateUser:", JSON.stringify(payload, null, 2));
 
-            // Gọi API để cập nhật thông tin bằng updateUser
             const updatedUser = await updateUser(userInfo.id, payload, token);
             console.log("Backend update response:", JSON.stringify(updatedUser, null, 2));
             setUserInfo(updatedUser);
             message.success("Cập nhật thông tin thành công!");
             setFile(null);
-            setPreviewUrl(null); // Reset preview URL
-            setIsEditing(false); // Đóng form
-            form.setFieldsValue({
-                ...updatedUser,
-                dateOfBirth: updatedUser.dateOfBirth ? dayjs(updatedUser.dateOfBirth) : null,
-            });
+            setPreviewUrl(null);
+            setIsEditing(false);
         } catch (error) {
             console.error("Lỗi khi cập nhật thông tin:", error);
             if (error.response?.status === 401) {
@@ -172,141 +159,221 @@ const UserProfile = () => {
 
     // Xử lý hủy chỉnh sửa
     const handleCancel = () => {
-        console.log("Hàm handleCancel được gọi");
         setIsEditing(false);
         setFile(null);
-        setPreviewUrl(null); // Reset preview URL
-        form.setFieldsValue({
-            fullname: userInfo.fullname,
-            email: userInfo.email,
-            phone: userInfo.phone,
-            address: userInfo.address,
-            citizenId: userInfo.citizenId,
-            dateOfBirth: userInfo.dateOfBirth ? dayjs(userInfo.dateOfBirth) : null,
-        });
+        setPreviewUrl(null);
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-center animate-pulse">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 text-lg">Đang tải thông tin cá nhân...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+                <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+                    <p className="text-red-500 font-semibold text-lg mb-4">Lỗi: {error}</p>
+                    <button
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
+                        onClick={() => window.location.reload()}
+                    >
+                        Thử lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="user-profile">
-            {loading ? (
-                <Spin tip="Đang tải..." />
-            ) : (
-                <div className="user-profile-content">
+        <div className="min-h-screen ">
+            <div className=" mx-auto">
+                <div className="bg-white rounded-xl  p-8 hover:shadow-xl ">
                     {isEditing ? (
                         // Chế độ chỉnh sửa
-                        <div>
-                            <div className="profile-header">
-                                <div className="avatar-section">
+                        <form onSubmit={handleSubmit}>
+                            <div className="flex flex-col items-center mb-8">
+                                {previewUrl || userInfo.avatar ? (
                                     <img
-                                        src={previewUrl || userInfo.avatar || "https://example.com/default-avatar.png"}
+                                        src={previewUrl || userInfo.avatar}
                                         alt="Avatar"
-                                        className="avatar"
+                                        className="w-32 h-32 rounded-full object-cover border-4 border-blue-100 shadow-md"
                                     />
+                                ) : (
+                                    <UserCircle2 className="w-32 h-32 text-gray-300" />
+                                )}
+                                <label className="inline-block mt-4 px-4 py-2 text-blue-800 text-md rounded cursor-pointer hover:opacity-60 transition duration-200">
+                                    Thay đổi ảnh đại diện
                                     <input
                                         type="file"
                                         accept="image/*"
                                         onChange={handleImageChange}
-                                        className="avatar-upload"
+                                        className="hidden"
                                     />
-                                </div>
+                                </label>
                             </div>
-
-                            <Form
-                                form={form}
-                                layout="vertical"
-                                onFinish={onFinish}
-                                onFinishFailed={(errorInfo) => {
-                                    console.log("Form validation failed:", errorInfo);
-                                }}
-                                className="profile-form"
-                            >
-                                <Form.Item
-                                    name="fullname"
-                                    label="Họ và tên"
-                                    rules={[{ required: false, message: "Vui lòng nhập họ và tên" }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name="email"
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ProfileFieldEdit
+                                    label="Tên đăng nhập"
+                                    name="username"
+                                    value={userInfo.username}
+                                    readOnly
+                                />
+                                <ProfileFieldEdit
                                     label="Email"
-                                    rules={[{ required: false, message: "Vui lòng nhập email" }, { type: "email", message: "Email không hợp lệ" }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name="phone"
+                                    name="email"
+                                    value={userInfo.email}
+                                    readOnly
+                                />
+                                <ProfileFieldEdit
+                                    label="Họ và tên"
+                                    name="fullname"
+                                    value={userInfo.fullname}
+                                />
+                                <ProfileFieldEdit
                                     label="Số điện thoại"
-                                    rules={[{ required: false, message: "Vui lòng nhập số điện thoại" }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name="address"
+                                    name="phone"
+                                    value={userInfo.phone}
+                                />
+                                <ProfileFieldEdit
                                     label="Địa chỉ"
-                                    rules={[{ required: false, message: "Vui lòng nhập địa chỉ" }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name="citizenId"
-                                    label="Căn cước công dân"
-                                    rules={[{ required: false, message: "Vui lòng nhập căn cước công dân" }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name="dateOfBirth"
+                                    name="address"
+                                    value={userInfo.address}
+                                />
+                                <ProfileFieldEdit
                                     label="Ngày sinh"
-                                    rules={[{ required: false, message: "Vui lòng chọn ngày sinh" }]}
+                                    name="dateOfBirth"
+                                    value={userInfo.dateOfBirth ? new Date(userInfo.dateOfBirth).toISOString().split('T')[0] : ""}
+                                    type="date"
+                                />
+                                <ProfileFieldEdit
+                                    label="CMND/CCCD"
+                                    name="citizenId"
+                                    value={userInfo.citizenId}
+                                />
+                            </div>
+                            <div className="mt-6 flex justify-center gap-4">
+                                <button
+                                    type="submit"
+                                    className={`px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    disabled={loading}
                                 >
-                                    <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-                                </Form.Item>
-                                <Form.Item>
-                                    <Button type="primary" htmlType="submit" loading={loading} style={{ marginRight: 8 }}>
-                                        Lưu thay đổi
-                                    </Button>
-                                    <Button onClick={handleCancel}>Hủy</Button>
-                                </Form.Item>
-                            </Form>
-                        </div>
+                                    {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleCancel}
+                                    className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all duration-300"
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                        </form>
                     ) : (
                         // Chế độ xem
                         <div>
-                            <div className="profile-header">
-                                <img
-                                    src={userInfo.avatar || "https://example.com/default-avatar.png"}
-                                    alt="Avatar"
-                                    className="avatar"
-                                />
-                                <div className="profile-info">
-                                    <h2>Họ và tên: {userInfo.fullname || "Chưa cập nhật"}</h2>
-                                    <p>Email: {userInfo.email || "Chưa cập nhật"}</p>
-                                    <p>Số điện thoại: {userInfo.phone || "Chưa cập nhật"}</p>
-                                    <p>Địa chỉ: {userInfo.address || "Chưa cập nhật"}</p>
-                                    <p>Ngày sinh: {userInfo.dateOfBirth || "Chưa cập nhật"}</p>
-                                    <p>Căn cước công dân: {userInfo.citizenId || "Chưa cập nhật"}</p>
-                                </div>
+                            <div className="flex flex-col items-center mb-8">
+                                {userInfo.avatar ? (
+                                    <img
+                                        src={userInfo.avatar}
+                                        alt="Avatar"
+                                        className="w-32 h-32 rounded-full object-cover border-4 border-blue-100 shadow-md"
+                                    />
+                                ) : (
+                                    <UserCircle2 className="w-32 h-32 text-gray-300" />
+                                )}
+                                <h3 className="mt-4 text-2xl font-semibold text-gray-800">{userInfo.fullname || "Chưa có tên"}</h3>
+                                <p className="text-gray-500">{userInfo.email || "Chưa có email"}</p>
                             </div>
-
-                            <div className="profile-actions">
-                                <Button
-                                    type="link"
-                                    onClick={() => {
-                                        console.log("Nhấn nút Chỉnh sửa hồ sơ");
-                                        setIsEditing(true);
-                                    }}
-                                    className="linkto"
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ProfileField
+                                    icon={<UserCircle2 className="text-blue-500" size={20} />}
+                                    label="Tên đăng nhập"
+                                    value={userInfo.username || "Chưa có"}
+                                />
+                                <ProfileField
+                                    icon={<Mail className="text-blue-500" size={20} />}
+                                    label="Email"
+                                    value={userInfo.email || "Chưa có"}
+                                />
+                                <ProfileField
+                                    icon={<UserCircle2 className="text-blue-500" size={20} />}
+                                    label="Họ và tên"
+                                    value={userInfo.fullname || "Chưa có"}
+                                />
+                                <ProfileField
+                                    icon={<Phone className="text-blue-500" size={20} />}
+                                    label="Số điện thoại"
+                                    value={userInfo.phone || "Chưa có"}
+                                />
+                                <ProfileField
+                                    icon={<MapPin className="text-blue-500" size={20} />}
+                                    label="Địa chỉ"
+                                    value={userInfo.address || "Chưa có"}
+                                />
+                                <ProfileField
+                                    icon={<Calendar className="text-blue-500" size={20} />}
+                                    label="Ngày sinh"
+                                    value={
+                                        userInfo.dateOfBirth
+                                            ? new Date(userInfo.dateOfBirth).toLocaleDateString("vi-VN")
+                                            : "Chưa có"
+                                    }
+                                />
+                                <ProfileField
+                                    icon={<IdCard className="text-blue-500" size={20} />}
+                                    label="CMND/CCCD"
+                                    value={userInfo.citizenId || "Chưa có"}
+                                />
+                            </div>
+                            <div className="mt-6 flex justify-center">
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
                                 >
                                     Chỉnh sửa hồ sơ
-                                </Button>
+                                </button>
                             </div>
                         </div>
                     )}
                 </div>
-            )}
+            </div>
         </div>
     );
 };
+
+// Component hiển thị thông tin trong chế độ xem
+const ProfileField = ({ icon, label, value }) => (
+    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+        {icon}
+        <div>
+            <p className="text-sm text-gray-500">{label}</p>
+            <p className="text-lg font-medium text-gray-800">{value}</p>
+        </div>
+    </div>
+);
+
+// Component chỉnh sửa thông tin trong chế độ chỉnh sửa
+const ProfileFieldEdit = ({ label, name, value, type = "text", readOnly = false }) => (
+    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+        <div className="w-full">
+            <label className="text-sm text-gray-500">{label}</label>
+            <input
+                type={type}
+                name={name}
+                defaultValue={value}
+                readOnly={readOnly}
+                className={`w-full mt-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${readOnly ? "bg-gray-200 cursor-not-allowed" : ""
+                    }`}
+            />
+        </div>
+    </div>
+);
 
 export default memo(UserProfile);

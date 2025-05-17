@@ -2,86 +2,26 @@ import React, { useState, useEffect } from "react";
 import { Line, Bar, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
 import { CreditCard, Search, Users, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { getAllBookings, getEmployeeStats } from "../../../api/BookingApi";
 
 ChartJS.register(ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Overview = () => {
     const [payments, setPayments] = useState([]);
-    const [chuyenDi, setChuyenDi] = useState([
-        {
-            tour: "Hà Nội-SaPa 4 ngày 3 đêm",
-            soLuongDi: 100,
-            soLuongHuy: 5,
-            doanhThu: 100000000,
-            status: "PAID",
-        },
-        {
-            tour: "Khám phá xứ sở kim chi 4 ngày 3 đêm",
-            soLuongDi: 80,
-            soLuongHuy: 10,
-            doanhThu: 200000000,
-            status: "PENDING",
-        },
-        {
-            tour: "Đà Nẵng-Hội An 3 ngày 2 đêm",
-            soLuongDi: 120,
-            soLuongHuy: 8,
-            doanhThu: 150000000,
-            status: "PAID",
-        },
-        {
-            tour: "Phú Quốc 4 ngày 3 đêm",
-            soLuongDi: 90,
-            soLuongHuy: 12,
-            doanhThu: 180000000,
-            status: "PAID",
-        },
-        {
-            tour: "Nhật Bản 5 ngày 4 đêm",
-            soLuongDi: 60,
-            soLuongHuy: 3,
-            doanhThu: 250000000,
-            status: "PAID",
-        },
-        {
-            tour: "Hà Giang 3 ngày 2 đêm",
-            soLuongDi: 70,
-            soLuongHuy: 6,
-            doanhThu: 90000000,
-            status: "FAILED",
-        },
-    ]);
-    const [nhanVien, setNhanVien] = useState([
-        {
-            tenNhanVien: "Nguyễn Thị Trinh",
-            soLuongTour: 5,
-            doanhThu: 2000000,
-            hoaHong: 100000,
-        },
-        {
-            tenNhanVien: "Tôn Văn Diện",
-            soLuongTour: 0,
-            doanhThu: 0,
-            hoaHong: 0,
-        },
-        {
-            tenNhanVien: "Đỗ Mạnh Cường",
-            soLuongTour: 0,
-            doanhThu: 0,
-            hoaHong: 0,
-        },
-    ]);
+    const [chuyenDi, setChuyenDi] = useState([]);
+    const [nhanVien, setNhanVien] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [filter, setFilter] = useState("all");
     const [search, setSearch] = useState("");
-    const [page, setPage] = useState(0);
+    const [pageTrips, setPageTrips] = useState(0);
+    const [pageEmployees, setPageEmployees] = useState(0);
     const [timeFilter, setTimeFilter] = useState("month");
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const pageSize = 5;
+
     const token = localStorage.getItem("token");
 
-    // Lấy dữ liệu từ API
+    // Lấy dữ liệu Payments
     const fetchPayments = async () => {
         try {
             if (!token) throw new Error("Chưa đăng nhập hoặc không có quyền admin");
@@ -91,15 +31,81 @@ const Overview = () => {
             if (!response.ok) throw new Error("Không thể lấy dữ liệu thanh toán");
             const data = await response.json();
             setPayments(data.result || []);
-            setLoading(false);
         } catch (err) {
-            setError(err.message);
+            throw err;
+        }
+    };
+
+    // Lấy dữ liệu Chuyến đi
+    const fetchTrips = async () => {
+        try {
+            const bookings = await getAllBookings();
+            console.log('Bookings:', bookings); // Log để kiểm tra dữ liệu API
+            // Nhóm bookings theo tourId
+            const tourMap = bookings.reduce((acc, item) => {
+                const tourId = item.tourId || item.tourName || `unknown-${item.id}`; // Fallback để tránh lỗi
+                if (!acc[tourId]) {
+                    acc[tourId] = {
+                        id: tourId,
+                        tour: item.tourName || "Unknown Tour",
+                        soLuongDi: 0,
+                        soLuongHuy: 0,
+                        doanhThu: 0,
+                    };
+                }
+                if (item.status === "PAID") {
+                    acc[tourId].soLuongDi += item.quantity || 0;
+                    acc[tourId].doanhThu += Number(item.paid) || 0;
+                } else if (item.status === "FAILED") {
+                    acc[tourId].soLuongHuy += item.quantity || 0;
+                }
+                return acc;
+            }, {});
+            // Chuyển tourMap thành mảng và gán rowStatus
+            const mappedData = Object.values(tourMap).map(tour => ({
+                ...tour,
+                rowStatus: tour.soLuongDi > 0 && tour.soLuongHuy > 0 ? "mixed" :
+                    tour.soLuongDi > 0 ? "onlyBooked" : "onlyCancelled",
+            }));
+            console.log('Aggregated Tours:', mappedData); // Log để kiểm tra dữ liệu tổng hợp
+            setChuyenDi(mappedData);
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    // Lấy dữ liệu Nhân viên
+    const fetchEmployees = async () => {
+        try {
+            const stats = await getEmployeeStats();
+            const mappedData = stats.map((item) => ({
+                id: item.id,
+                tenNhanVien: item.tenNhanVien,
+                soLuongTour: item.soLuongTour,
+                doanhThu: Number(item.doanhThu),
+                hoaHong: Number(item.hoaHong),
+            }));
+            setNhanVien(mappedData);
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    // Hàm tải dữ liệu
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            await Promise.all([fetchPayments(), fetchTrips(), fetchEmployees()]);
+        } catch (err) {
+            setError(err.message || "Không thể tải dữ liệu");
+        } finally {
             setLoading(false);
         }
     };
 
+    // Gọi loadData khi component mount
     useEffect(() => {
-        fetchPayments();
+        loadData();
     }, []);
 
     // Tính số liệu tổng quan
@@ -130,7 +136,6 @@ const Overview = () => {
             return acc;
         }, {});
 
-    // Chuẩn bị dữ liệu cho biểu đồ đường
     const lineData = {
         labels:
             timeFilter === "month"
@@ -155,28 +160,29 @@ const Overview = () => {
         ],
     };
 
-    // Lọc và tìm kiếm
+    // Lọc dữ liệu ở frontend
     const filteredChuyenDi = chuyenDi.filter(
         (t) =>
-            (filter === "all" || t.status.toLowerCase() === filter.toLowerCase()) &&
-            (t.tour.toLowerCase().includes(search.toLowerCase()) || t.doanhThu.toString().includes(search))
+            t.tour.toLowerCase().includes(search.toLowerCase()) ||
+            t.doanhThu.toString().includes(search)
     );
-
     const filteredNhanVien = nhanVien.filter(
         (n) =>
             n.tenNhanVien.toLowerCase().includes(search.toLowerCase()) ||
             n.doanhThu.toString().includes(search)
     );
 
-    // Phân trang cho bảng Chuyến đi
-    const paginatedChuyenDi = filteredChuyenDi.slice(page * pageSize, (page + 1) * pageSize);
+    const paginatedChuyenDi = filteredChuyenDi.slice(pageTrips * pageSize, (pageTrips + 1) * pageSize);
+    const paginatedNhanVien = filteredNhanVien.slice(pageEmployees * pageSize, (pageEmployees + 1) * pageSize);
+
+    const totalChuyenDiPages = Math.ceil(filteredChuyenDi.length / pageSize);
+    const totalNhanVienPages = Math.ceil(filteredNhanVien.length / pageSize);
 
     // Top 5 tour doanh thu cao nhất
     const topTours = [...chuyenDi]
         .sort((a, b) => b.doanhThu - a.doanhThu)
         .slice(0, 5);
 
-    // Dữ liệu biểu đồ cột (top 5 tour)
     const barData = {
         labels: topTours.map((t) => t.tour),
         datasets: [
@@ -190,7 +196,6 @@ const Overview = () => {
         ],
     };
 
-    // Dữ liệu biểu đồ tròn
     const pieData = {
         labels: ["Thành công", "Hủy"],
         datasets: [
@@ -203,7 +208,6 @@ const Overview = () => {
         ],
     };
 
-    // Danh sách năm cho dropdown
     const years = Array.from({ length: 6 }, (_, i) => selectedYear - i);
 
     if (loading) {
@@ -221,7 +225,7 @@ const Overview = () => {
                 <p className="font-semibold">Lỗi: {error}</p>
                 <button
                     className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    onClick={fetchPayments}
+                    onClick={loadData}
                 >
                     Thử lại
                 </button>
@@ -245,9 +249,9 @@ const Overview = () => {
             </div>
 
             {/* Biểu đồ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Biểu đồ đường doanh thu theo thời gian */}
-                <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="space-y-6">
+                {/* Line Chart (Full Width) */}
+                <div className="bg-white p-6 rounded-lg shadow-md w-full">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-bold">Doanh thu theo thời gian</h3>
                         <div className="flex space-x-2">
@@ -286,30 +290,43 @@ const Overview = () => {
                     />
                 </div>
 
-                {/* Biểu đồ cột top 5 tour */}
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h3 className="text-lg font-bold mb-4">Top 5 tour doanh thu cao nhất</h3>
-                    <Bar
-                        data={barData}
-                        options={{
-                            responsive: true,
-                            plugins: { legend: { position: "top" } },
-                            scales: {
-                                x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } },
-                                y: { beginAtZero: true, title: { display: true, text: "Doanh thu (VND)" } },
-                            },
-                        }}
-                    />
+                {/* Bar Chart và Pie Chart (Hai cột) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Bar chart */}
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-lg font-bold mb-4">Top 5 tour doanh thu cao nhất</h3>
+                        <Bar
+                            data={barData}
+                            options={{
+                                responsive: true,
+                                plugins: { legend: { position: "top" } },
+                                scales: {
+                                    x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } },
+                                    y: { beginAtZero: true, title: { display: true, text: "Doanh thu (VND)" } },
+                                },
+                            }}
+                        />
+                    </div>
+
+                    {/* Pie chart */}
+                    <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                        <h3 className="text-lg font-bold mb-4">Tỷ lệ chuyến đi</h3>
+                        <div className="w-[400px] h-[400px]">
+                            <Pie
+                                data={pieData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { position: "top" } },
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                {/* Biểu đồ tròn tỷ lệ chuyến đi */}
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h3 className="text-lg font-bold mb-4">Tỷ lệ chuyến đi</h3>
-                    <Pie data={pieData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />
-                </div>
             </div>
 
-            {/* Bộ lọc và tìm kiếm */}
+            {/* Tìm kiếm */}
             <div className="flex justify-between items-center mb-4">
                 <div className="relative w-1/3">
                     <input
@@ -321,16 +338,6 @@ const Overview = () => {
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 </div>
-                <select
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="all">Tất cả</option>
-                    <option value="paid">Thành công</option>
-                    <option value="pending">Đang chờ</option>
-                    <option value="failed">Thất bại</option>
-                </select>
             </div>
 
             {/* Bảng Chuyến đi */}
@@ -343,39 +350,40 @@ const Overview = () => {
                             <th className="p-3 border-b w-1/5">SL đã đi</th>
                             <th className="p-3 border-b w-1/5">SL hủy</th>
                             <th className="p-3 border-b w-1/5">Doanh thu</th>
-                            <th className="p-3 border-b w-1/5">Trạng thái</th>
                         </tr>
                     </thead>
                     <tbody>
                         {paginatedChuyenDi.map((item, index) => (
-                            <tr key={index} className="border-b hover:bg-gray-50">
+                            <tr
+                                key={index}
+                                className={`border-b ${item.rowStatus === "onlyBooked" ? "bg-green-100 hover:bg-green-200" :
+                                    item.rowStatus === "onlyCancelled" ? "bg-red-100 hover:bg-red-200" :
+                                        "bg-yellow-100 hover:bg-yellow-200"
+                                    }`}
+                            >
                                 <td className="p-3">{item.tour}</td>
                                 <td className="p-3">{item.soLuongDi}</td>
                                 <td className="p-3">{item.soLuongHuy}</td>
                                 <td className="p-3">{item.doanhThu.toLocaleString()} đ</td>
-                                <td className={`p-3 ${item.status === "PAID" ? "text-green-600" : item.status === "PENDING" ? "text-yellow-500" : "text-red-600"}`}>
-                                    {item.status === "PAID" ? "Thành công" : item.status === "PENDING" ? "Đang chờ" : "Thất bại"}
-                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
-                {/* Phân trang */}
                 <div className="flex justify-center mt-4">
                     <button
-                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        onClick={() => setPageTrips((p) => Math.max(0, p - 1))}
                         className="px-4 py-2 border rounded-l-lg disabled:opacity-50"
-                        disabled={page === 0}
+                        disabled={pageTrips === 0}
                     >
                         <ChevronLeft size={20} />
                     </button>
                     <span className="px-4 py-2 border-t border-b">
-                        Trang {page + 1} / {Math.ceil(filteredChuyenDi.length / pageSize)}
+                        Trang {pageTrips + 1} / {totalChuyenDiPages}
                     </span>
                     <button
-                        onClick={() => setPage((p) => p + 1)}
+                        onClick={() => setPageTrips((p) => p + 1)}
                         className="px-4 py-2 border rounded-r-lg disabled:opacity-50"
-                        disabled={(page + 1) * pageSize >= filteredChuyenDi.length}
+                        disabled={(pageTrips + 1) * pageSize >= filteredChuyenDi.length}
                     >
                         <ChevronRight size={20} />
                     </button>
@@ -395,7 +403,7 @@ const Overview = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredNhanVien.map((item, index) => (
+                        {paginatedNhanVien.map((item, index) => (
                             <tr key={index} className="border-b hover:bg-gray-50">
                                 <td className="p-3">{item.tenNhanVien}</td>
                                 <td className="p-3">{item.soLuongTour}</td>
@@ -405,6 +413,25 @@ const Overview = () => {
                         ))}
                     </tbody>
                 </table>
+                <div className="flex justify-center mt-4">
+                    <button
+                        onClick={() => setPageEmployees((p) => Math.max(0, p - 1))}
+                        className="px-4 py-2 border rounded-l-lg disabled:opacity-50"
+                        disabled={pageEmployees === 0}
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+                    <span className="px-4 py-2 border-t border-b">
+                        Trang {pageEmployees + 1} / {totalNhanVienPages}
+                    </span>
+                    <button
+                        onClick={() => setPageEmployees((p) => p + 1)}
+                        className="px-4 py-2 border rounded-r-lg disabled:opacity-50"
+                        disabled={(pageEmployees + 1) * pageSize >= filteredNhanVien.length}
+                    >
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
             </div>
         </div>
     );

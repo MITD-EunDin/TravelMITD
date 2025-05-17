@@ -1,0 +1,155 @@
+$theme-color : ("main" : #071635,
+  "hover" : #ED504E,
+  "text_black" : #333333,
+  "text_blue" : #7AB2F7,
+  "text_silver" : #757575,
+  "background" : #f7f7f7,
+  "weak_red" : #EA5652,
+  "blue_weight" : #4581BA,
+);
+
+h1 {
+  font-size: 2rem;
+  color: map-get($theme-color, "blue_weight");
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.input-column {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+
+    span {
+      margin-bottom: 5px;
+      color: map-get($theme-color, "text_silver");
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+  }
+}
+
+.form-1,
+.form-2 {
+  padding: 20px 50px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .form-section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #555;
+
+    svg {
+      margin-right: 10px;
+    }
+  }
+}
+
+.form-fields {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-field-2 {
+  .form-description {
+    margin-bottom: 15px;
+
+    span {
+      display: block;
+      margin-bottom: 5px;
+      color: #666;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      height: 200px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+  }
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin: 20px 0;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+.from-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+
+//
+.region-dropdown {
+  position: relative;
+
+  span {
+    cursor: pointer;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: block;
+  }
+
+  text {
+    color: map-get($theme-color, "text_silver");
+    padding-bottom: 5px;
+  }
+
+  .region-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    z-index: 10;
+
+    li {
+      padding: 8px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+    }
+  }
+}

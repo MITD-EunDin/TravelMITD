@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 import LoginForm from "./views/FormLog/Login";
 import SignupForm from "./views/FormLog/signup";
+import ResetPassword from "./views/FormLog/ResetPassword";
 
 import { AuthProvider, useAuth } from "../src/Contexts/AuthContext";
 import ProtectedAdmin from "./routes/ProtectedAdmin";
@@ -25,6 +26,7 @@ import EmployeeDashboard from "./views/PageStaff/EmployeeDashboard";
 import EmployeeOrders from "./views/PageStaff/EmployeeOrders";
 import EmployeeProfile from "./views/PageStaff/EmployeeProfile";
 import EmployeeTours from "./views/PageStaff/EmployeeTours";
+import EmployeeNotifications from "./views/PageStaff/EmployeeNotifications";
 
 
 import Booking from "./views/PageUser/booking";
@@ -63,6 +65,7 @@ function App() {
             {/* ✅ Nếu chưa đăng nhập -> luôn đưa về trang login */}
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<SignupForm />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path='/invoices/:bookingId' element={<InvoiceDetail />} />
             <Route path="/payment-result" element={<PaymentResult />} />
             {/* Các route yêu cầu đăng nhập */}
@@ -94,7 +97,7 @@ function App() {
               <Route path="dashboard" element={<EmployeeDashboard />} />
               <Route path="orders" element={<EmployeeOrders />} />
               <Route path="tours" element={<EmployeeTours />} />
-              <Route path="notifications" element={<EmployeeDashboard />} />
+              <Route path="notifications" element={<EmployeeNotifications />} />
               <Route path="profile" element={<EmployeeProfile />} />
             </Route>
 

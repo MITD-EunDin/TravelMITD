@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Địa chỉ base URL của backend, bao gồm context path
-const API_URL = REACT_APP_API_URL ||'http://localhost:8080';
+const API_URL = 'http://localhost:8080';
 
 // Tạo instance của axios với cấu hình mặc định
 const api = axios.create({
@@ -100,6 +100,23 @@ export const getMyInfo = async (token) => {
         headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.result;
+};
+
+export const loginWithGoogleApi = async (idToken) => {
+    const response = await api.post('/auth/google', { idToken });
+    return response.data; // Trả về { token, authenticated }
+};
+
+export const updatePasswordApi = async (id, newPassword) => {
+    try {
+        const response = await api.post('/auth/update-password', null, {
+            params: { id, newPassword }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Update password API error:", error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export default api;

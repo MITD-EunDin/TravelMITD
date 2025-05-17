@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { UserCircle2 } from "lucide-react";
+import { UserCircle2, Mail, Phone, MapPin, Calendar, IdCard } from "lucide-react";
 import { useAuth } from "../../Contexts/AuthContext";
-import { FloatingInput } from "../FormLog/Login"; // Giả định đường dẫn từ LoginForm.jsx
 
 const EmployeeProfile = () => {
     const { token } = useAuth();
@@ -40,79 +39,103 @@ const EmployeeProfile = () => {
 
     if (loading) {
         return (
-            <div className="p-6 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Đang tải thông tin cá nhân...</p>
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-center animate-pulse">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 text-lg">Đang tải thông tin cá nhân...</p>
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-6 text-center text-red-500 bg-red-100 rounded-lg mx-auto max-w-screen-xl">
-                <p className="font-semibold">Lỗi: {error}</p>
-                <button
-                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    onClick={() => window.location.reload()}
-                >
-                    Thử lại
-                </button>
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+                <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+                    <p className="text-red-500 font-semibold text-lg mb-4">Lỗi: {error}</p>
+                    <button
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200"
+                        onClick={() => window.location.reload()}
+                    >
+                        Thử lại
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="border border-gray-300 rounded-lg p-6 bg-white shadow-md max-w-md mx-auto">
-                <h2 className="text-xl font-bold mb-4 flex items-center">
-                    <UserCircle2 className="mr-2 text-blue-600" size={24} />
-                    Hồ sơ cá nhân
-                </h2>
-                <div className="space-y-4">
-                    <FloatingInput
-                        label="Tên đăng nhập"
-                        value={profile.username}
-                        disabled
-                    />
-                    <FloatingInput
-                        label="Email"
-                        value={profile.email}
-                        disabled
-                    />
-                    <FloatingInput
-                        label="Họ và tên"
-                        value={profile.fullname}
-                        disabled
-                    />
-                    <FloatingInput
-                        label="Số điện thoại"
-                        value={profile.phone}
-                        disabled
-                    />
-                    <FloatingInput
-                        label="Địa chỉ"
-                        value={profile.address}
-                        disabled
-                    />
-                    <FloatingInput
-                        label="Ngày sinh"
-                        value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString("vi-VN") : ""}
-                        disabled
-                    />
-                    <FloatingInput
-                        label="CMND/CCCD"
-                        value={profile.citizenId}
-                        disabled
-                    />
-                    {profile.avatar && (
-                        <div className="mt-4">
-                            <img src={profile.avatar} alt="Avatar" className="w-24 h-24 rounded-full mx-auto" />
-                        </div>
-                    )}
+        <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
+            <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+                    <div className="flex flex-col items-center mb-8">
+                        {profile.avatar ? (
+                            <img
+                                src={profile.avatar}
+                                alt="Avatar"
+                                className="w-32 h-32 rounded-full object-cover border-4 border-blue-100 shadow-md"
+                            />
+                        ) : (
+                            <UserCircle2 className="w-32 h-32 text-gray-300" />
+                        )}
+                        <h3 className="mt-4 text-2xl font-semibold text-gray-800">{profile.fullname || "Chưa có tên"}</h3>
+                        <p className="text-gray-500">{profile.email || "Chưa có email"}</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <ProfileField
+                            icon={<UserCircle2 className="text-blue-500" size={20} />}
+                            label="Tên đăng nhập"
+                            value={profile.username || "Chưa có"}
+                        />
+                        <ProfileField
+                            icon={<Mail className="text-blue-500" size={20} />}
+                            label="Email"
+                            value={profile.email || "Chưa có"}
+                        />
+                        {/* <ProfileField
+                            icon={<UserCircle2 className="text-blue-500" size={20} />}
+                            label="Họ và tên"
+                            value={profile.fullname || "Chưa có"}
+                        /> */}
+                        <ProfileField
+                            icon={<Phone className="text-blue-500" size={20} />}
+                            label="Số điện thoại"
+                            value={profile.phone || "Chưa có"}
+                        />
+                        <ProfileField
+                            icon={<MapPin className="text-blue-500" size={20} />}
+                            label="Địa chỉ"
+                            value={profile.address || "Chưa có"}
+                        />
+                        <ProfileField
+                            icon={<Calendar className="text-blue-500" size={20} />}
+                            label="Ngày sinh"
+                            value={
+                                profile.dateOfBirth
+                                    ? new Date(profile.dateOfBirth).toLocaleDateString("vi-VN")
+                                    : "Chưa có"
+                            }
+                        />
+                        <ProfileField
+                            icon={<IdCard className="text-blue-500" size={20} />}
+                            label="CMND/CCCD"
+                            value={profile.citizenId || "Chưa có"}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+
+const ProfileField = ({ icon, label, value }) => (
+    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+        {icon}
+        <div>
+            <p className="text-sm text-gray-500">{label}</p>
+            <p className="text-lg font-medium text-gray-800">{value}</p>
+        </div>
+    </div>
+);
 
 export default EmployeeProfile;

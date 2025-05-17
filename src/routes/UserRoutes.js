@@ -6,7 +6,6 @@ import DetailTour from "../views/PageUser/detailTour/index";
 import Booking from "../views/PageUser/booking/index";
 import RSSNews from "../views/PageUser/RSSNews";
 import AccountLayout from "../views/PageUser/Account/AccountLayout";
-import DetailService from "../views/PageUser/detailservice/index";
 
 export const userRoutes = [
     { path: "/", element: <MainPage /> },
@@ -15,6 +14,4 @@ export const userRoutes = [
     { path: "/news", element: <RSSNews /> },
     { path: "/tours/:id", element: <DetailTour /> },
     { path: "/booking", element: <Booking /> },
-    { path: "/detailservice", element: <DetailService /> },
-
 ];

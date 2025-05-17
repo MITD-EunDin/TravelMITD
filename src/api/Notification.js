@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Địa chỉ base URL của backend
-const API_URL = REACT_APP_API_URL || 'http://localhost:8080';
+const API_URL = 'http://localhost:8080';
 
 // Tạo instance của axios với cấu hình mặc định
 const api = axios.create({

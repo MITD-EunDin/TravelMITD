@@ -1,10 +1,11 @@
 import { useState, useEffect, useContext } from "react";
-import { Grid, List } from "lucide-react";
-import { FaClock, FaBus, FaHotel, FaStar, FaHeart, FaRegHeart } from "react-icons/fa";
+import { Grid, List, X } from "lucide-react";
+import { FaClock, FaBus, FaHotel, FaStar, FaHeart, FaRegHeart, FaFilter } from "react-icons/fa";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { ToursContext } from "../../../Contexts/ToursContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import './pagetour.scss';
 
 export default function PageTour() {
     const { tours } = useContext(ToursContext);
@@ -21,6 +22,7 @@ export default function PageTour() {
     const [toursPerPage] = useState(6);
     const [favorites, setFavorites] = useState([]);
     const [token, setToken] = useState(localStorage.getItem("token") || null);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -233,7 +235,7 @@ export default function PageTour() {
             return true;
         })
         .filter((tour) =>
-            tour.tourName?.toLowerCase().includes(search.toLowerCase())
+            tour.tourName?.toLowerCase().includes(search?.toLowerCase() ?? "")
         );
 
     const indexOfLastTour = currentPage * toursPerPage;
@@ -247,16 +249,25 @@ export default function PageTour() {
         }
     };
 
+    const toggleFilter = () => {
+        setIsFilterOpen(!isFilterOpen);
+    };
+
     return (
-        <div className="container max-w-screen-xl mx-auto flex">
-            <aside className="w-1/5 p-4 border-r">
-                <h2 className="font-bold text-lg">Danh Mục Tour</h2>
-                <ul className="mt-2 space-y-2">
-                    <li className="font-bold">Tour trong nước ({tourCounts.domestic})</li>
-                    <ul className="ml-4 space-y-2">
+        <div className="container">
+            <aside className={`aside ${isFilterOpen ? 'aside-open' : ''}`}>
+                <div className="aside-header">
+                    <h2 className="aside-title">Danh Mục Tour</h2>
+                    <button className="close-button" onClick={toggleFilter}>
+                        <X size={24} />
+                    </button>
+                </div>
+                <ul className="aside-list">
+                    <li className="aside-item">Tour trong nước ({tourCounts.domestic})</li>
+                    <ul className="aside-sub-list">
                         {["north", "central", "south"].map((region) => (
                             <li key={region}>
-                                <label className="flex items-center gap-2">
+                                <label className="aside-filter">
                                     <input
                                         type="checkbox"
                                         checked={filters.region.includes(region)}
@@ -268,11 +279,11 @@ export default function PageTour() {
                         ))}
                     </ul>
 
-                    <li className="font-bold">Tour nước ngoài ({tourCounts.international})</li>
-                    <ul className="ml-4 space-y-2">
+                    <li className="aside-item">Tour nước ngoài ({tourCounts.international})</li>
+                    <ul className="aside-sub-list">
                         {["china", "korea", "japan", "americas"].map((country) => (
                             <li key={country}>
-                                <label className="flex items-center gap-2">
+                                <label className="aside-filter">
                                     <input
                                         type="checkbox"
                                         checked={filters.country.includes(country)}
@@ -284,11 +295,11 @@ export default function PageTour() {
                         ))}
                     </ul>
 
-                    <li className="font-bold">Tour theo giá</li>
-                    <ul className="ml-4 space-y-2">
+                    <li className="aside-item">Tour theo giá</li>
+                    <ul className="aside-sub-list">
                         {["under2", "2to5", "above5"].map((price) => (
                             <li key={price}>
-                                <label className="flex items-center gap-2">
+                                <label className="aside-filter">
                                     <input
                                         type="checkbox"
                                         checked={filters.price.includes(price)}
@@ -300,11 +311,11 @@ export default function PageTour() {
                         ))}
                     </ul>
 
-                    <li className="font-bold">Tour theo số ngày</li>
-                    <ul className="ml-4 space-y-2">
+                    <li className="aside-item">Tour theo số ngày</li>
+                    <ul className="aside-sub-list">
                         {["1day", "2days1night", "3days2nights", "4days3nights", "over4days"].map((duration) => (
                             <li key={duration}>
-                                <label className="flex items-center gap-2">
+                                <label className="aside-filter">
                                     <input
                                         type="checkbox"
                                         checked={filters.duration.includes(duration)}
@@ -317,7 +328,7 @@ export default function PageTour() {
                     </ul>
 
                     <li>
-                        <label className="flex items-center gap-2">
+                        <label className="aside-filter">
                             <input
                                 type="checkbox"
                                 checked={filters.discount}
@@ -329,36 +340,40 @@ export default function PageTour() {
                 </ul>
             </aside>
 
-            <main className="w-4/5 p-4">
-                <div className="flex justify-between mb-4">
+            <main className="main">
+                <div className="header">
+                    <button className="filter-button" onClick={toggleFilter}>
+                        <FaFilter size={20} />
+                        <span>Danh mục</span>
+                    </button>
                     <input
                         type="text"
                         placeholder="Tìm kiếm tour..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-64 border p-2 rounded"
+                        className="search-input"
                     />
-                    <div className="flex gap-2">
-                        <button className="border p-2 rounded" onClick={() => setView("list")}>
+                    <div className="view-toggle">
+                        <button className="view-button" onClick={() => setView("list")}>
                             <List />
                         </button>
-                        <button className="border p-2 rounded" onClick={() => setView("grid")}>
+                        <button className="view-button" onClick={() => setView("grid")}>
                             <Grid />
                         </button>
                     </div>
                 </div>
 
-                <div className={view === "grid" ? "grid grid-cols-3 gap-4" : "space-y-4"}>
+                <div className={view === "grid" ? "tours-grid" : "tours-list"}>
                     {currentTours.length === 0 ? (
-                        <p className="text-center col-span-3 text-gray-500">Không tìm thấy tour nào.</p>
+                        <p className="no-tours">Không tìm thấy tour nào.</p>
                     ) : (
                         currentTours.map((tour) => (
                             <div
                                 key={tour.tourId}
-                                className={view === "grid" ? "p-4 rounded-lg border relative" : "flex border p-4 rounded-lg items-center relative"}
+                                className={view === "grid" ? "tour-card" : "tour-card-list"}
                             >
                                 <button
-                                    className="absolute top-2 right-2 text-2xl"
+                                    className="favorite-button"
                                     onClick={() => toggleFavorite(tour.tourId)}
                                 >
                                     {favorites.includes(tour.tourId) ? (
@@ -371,11 +386,11 @@ export default function PageTour() {
                                 <img
                                     src={tour.images && tour.images.length > 0 ? tour.images[0] : tour.image || 'https://via.placeholder.com/150'}
                                     alt={tour.tourName}
-                                    className={view === "grid" ? "w-full h-40 object-cover mb-2 rounded-lg" : "w-80 h-40 object-cover rounded-lg"}
+                                    className={view === "grid" ? "tour-image" : "tour-image-list"}
                                 />
-                                <div className={view === "grid" ? "" : "flex-1 px-4"}>
-                                    <h3 className="font-bold text-lg">{tour.tourName}</h3>
-                                    <div className="flex items-center text-yellow-500 text-sm mt-1">
+                                <div className={view === "grid" ? "tour-info" : "tour-info-list"}>
+                                    <h3 className="tour-title">{tour.tourName}</h3>
+                                    <div className="tour-rating">
                                         {tour.averageRating > 0 ? (
                                             <>
                                                 {[...Array(Math.floor(tour.averageRating))].map((_, i) => (
@@ -384,7 +399,7 @@ export default function PageTour() {
                                                 {tour.averageRating % 1 >= 0.5 && (
                                                     <FaStar className="text-yellow-300" />
                                                 )}
-                                                <span className="ml-2 text-gray-600">
+                                                <span className="text-gray-600">
                                                     ({tour.averageRating.toFixed(1)})
                                                 </span>
                                             </>
@@ -392,44 +407,38 @@ export default function PageTour() {
                                             <span className="text-gray-600">Chưa có đánh giá</span>
                                         )}
                                     </div>
-                                    <div className="flex flex-col text-sm text-gray-700 gap-2 mt-2">
-                                        <div className="flex items-center gap-2">
+                                    <div className="tour-details">
+                                        <div className="tour-details-item">
                                             <FaClock className="text-blue-500" /> <span>{tour.duration}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="tour-details-item">
                                             <FaBus className="text-red-500" /> <span>Phương tiện: {tour.transportation}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="tour-details-item">
                                             <FaHotel className="text-yellow-500" /> <span>Chỗ ở: {tour.accommodation || "Khách sạn 3 sao"}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div
-                                    className={
-                                        view === "grid"
-                                            ? "text-md font-bold text-red-500 text-right"
-                                            : "text-md font-bold text-red-500 w-32 text-right"
-                                    }
-                                >
-                                    {tour.price != null ? (
+                                <div className={view === "grid" ? "tour-price" : "tour-price-list"}>
+                                    {tour.price !== null && tour.price !== undefined ? (
                                         tour.discount ? (
                                             <div>
                                                 <p className="line-through text-gray-400">
-                                                    {tour.price.toLocaleString("vi-VN")} VNĐ
+                                                    {(tour.price ?? 0).toLocaleString("vi-VN")} VNĐ
                                                 </p>
                                                 <p className="text-red-500 font-extrabold">
-                                                    {(tour.newPrice).toLocaleString("vi-VN")} VNĐ
+                                                    {(tour.newPrice ?? 0).toLocaleString("vi-VN")} VNĐ
                                                 </p>
                                             </div>
                                         ) : (
-                                            <p>{tour.price.toLocaleString("vi-VN")} VNĐ</p>
+                                            <p>{(tour.price ?? 0).toLocaleString("vi-VN")} VNĐ</p>
                                         )
                                     ) : (
                                         <p className="text-gray-400 italic">Chưa có giá</p>
                                     )}
 
                                     <Link to={`/tours/${tour.tourId}`} state={{ tour }}>
-                                        <button className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
+                                        <button className="tour-detail-button">
                                             Chi Tiết
                                         </button>
                                     </Link>
@@ -440,11 +449,11 @@ export default function PageTour() {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex justify-center mt-6 space-x-2">
+                    <div className="pagination">
                         <button
                             onClick={() => paginate(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className={`px-4 py-2 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"}`}
+                            className={`pagination-button ${currentPage === 1 ? "pagination-button-disabled" : "pagination-button-inactive"}`}
                         >
                             Previous
                         </button>
@@ -452,7 +461,7 @@ export default function PageTour() {
                             <button
                                 key={page}
                                 onClick={() => paginate(page)}
-                                className={`px-4 py-2 border rounded ${currentPage === page ? "bg-blue-500 text-white" : "bg-white hover:bg-blue-100"}`}
+                                className={`pagination-button ${currentPage === page ? "pagination-button-active" : "pagination-button-inactive"}`}
                             >
                                 {page}
                             </button>
@@ -460,7 +469,7 @@ export default function PageTour() {
                         <button
                             onClick={() => paginate(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className={`px-4 py-2 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"}`}
+                            className={`pagination-button ${currentPage === totalPages ? "pagination-button-disabled" : "pagination-button-inactive"}`}
                         >
                             Next
                         </button>

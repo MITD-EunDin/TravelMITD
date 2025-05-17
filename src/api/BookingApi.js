@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = REACT_APP_API_URL || 'http://localhost:8080';
+const API_URL = 'http://localhost:8080';
 
 const API = axios.create({
     baseURL: API_URL,
@@ -139,6 +139,18 @@ export const getEmployees = async () => {
         return response.data.result;
     } catch (error) {
         console.error('Error fetching employees:', error.response?.data || error.message);
+        throw error.response?.data || error;
+    }
+};
+
+export const getEmployeeStats = async () => {
+    try {
+        console.log('Fetching employee stats');
+        const response = await API.get('/tour_booking/employee-stats');
+        console.log('Employee stats response:', response.data);
+        return response.data.result;
+    } catch (error) {
+        console.error('Error fetching employee stats:', error.response?.data || error.message);
         throw error.response?.data || error;
     }
 };

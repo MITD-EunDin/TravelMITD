@@ -1,3 +1,7 @@
+.account-wrapper {
+    position: relative;
+}
+
 .container-account {
     background: #fff;
     padding: 2rem;
@@ -8,63 +12,195 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    position: sticky;
-    top: 2rem;
 
-    .info-account {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #333;
-
-        svg {
-            color: #007bff;
-        }
+    @media (max-width: 1024px) {
+        display: none;
     }
 
-    .listNavi-account {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    &.container-account-open {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 80%;
+        max-width: 280px;
+        height: 100%;
+        z-index: 1000;
+        background-color: #ffffff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+        overflow-y: auto;
+        animation: slideIn 0.3s ease-in-out;
 
-        li {
-            margin-bottom: 1rem;
+        @media (min-width: 1025px) {
+            display: block;
+            position: static;
+            width: 280px;
+            height: auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+    }
+}
 
-            .linkto {
-                display: flex;
-                align-items: center;
-                gap: 0.8rem;
-                padding: 0.8rem 1rem;
-                text-decoration: none;
-                font-size: 1rem;
-                color: #555;
-                border-radius: 0.75rem;
-                transition: all 0.2s ease-in-out;
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-account {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+
+    svg {
+        color: #007bff;
+    }
+
+    @media (max-width: 768px) {
+        font-size: 1rem;
+        gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.875rem;
+        gap: 0.5rem;
+    }
+}
+
+.menu-close-button {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    @media (max-width: 1024px) {
+        display: block;
+    }
+
+    svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: #1f2937;
+    }
+}
+
+.menu-toggle-button {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    background-color: #ffffff;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #f3f4f6;
+    }
+
+    @media (max-width: 1024px) {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+
+    &.menu-toggle-button-hidden {
+        display: none;
+    }
+
+    @media (max-width: 480px) {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    svg {
+        width: 1.25rem;
+        height: 1.25rem;
+
+        @media (max-width: 480px) {
+            width: 1rem;
+            height: 1rem;
+        }
+    }
+}
+
+.listNavi-account {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+        margin-bottom: 1rem;
+
+        .linkto {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            font-size: 1rem;
+            color: #555;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+
+            svg {
+                color: #888;
+            }
+
+            &:hover {
+                background: #f0f4ff;
+                color: #007bff;
 
                 svg {
-                    color: #888;
-                }
-
-                &:hover {
-                    background: #f0f4ff;
                     color: #007bff;
-
-                    svg {
-                        color: #007bff;
-                    }
                 }
+            }
 
-                &.active {
-                    background: #007bff;
+            &.active {
+                background: #007bff;
+                color: #fff;
+                font-weight: 600;
+
+                svg {
                     color: #fff;
-                    font-weight: 600;
-
-                    svg {
-                        color: #fff;
-                    }
                 }
+            }
+
+            @media (max-width: 768px) {
+                font-size: 0.875rem;
+                padding: 0.6rem 0.8rem;
+                gap: 0.6rem;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.6rem;
+                gap: 0.4rem;
             }
         }
     }
@@ -75,11 +211,27 @@
     grid-template-columns: 280px 1fr;
     gap: 0;
     padding: 2rem;
+    box-sizing: border-box;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
 
     .account-content {
+        margin-left: 2rem;
         background: #fff;
         border-radius: 1.5rem;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
         min-height: 80vh;
+        padding: 0;
+
+        @media (max-width: 768px) {
+            padding: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.75rem;
+        }
     }
 }
