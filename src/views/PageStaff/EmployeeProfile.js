@@ -21,7 +21,7 @@ const EmployeeProfile = () => {
         const fetchProfile = async () => {
             try {
                 if (!token) throw new Error("Chưa đăng nhập");
-                const response = await fetch("http://localhost:8080/employee/profile", {
+                const response = await fetch("https://be-travel-mitd.onrender.com/employee/profile", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!response.ok) throw new Error("Không thể lấy thông tin cá nhân");

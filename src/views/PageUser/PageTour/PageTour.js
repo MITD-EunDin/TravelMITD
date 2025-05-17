@@ -35,7 +35,7 @@ export default function PageTour() {
                 return;
             }
             try {
-                const response = await axios.get("http://localhost:8080/api/favorites", {
+                const response = await axios.get("https://be-travel-mitd.onrender.com/api/favorites", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setFavorites(response.data || []);
@@ -71,14 +71,14 @@ export default function PageTour() {
 
         try {
             if (favorites.includes(tourId)) {
-                await axios.delete(`http://localhost:8080/api/favorites/${tourId}`, {
+                await axios.delete(`https://be-travel-mitd.onrender.com/api/favorites/${tourId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== tourId));
                 toast.success("Đã xóa khỏi yêu thích!");
                 console.log(`Removed favorite: ${tourId}`);
             } else {
-                await axios.post("http://localhost:8080/api/favorites", { tourId }, {
+                await axios.post("https://be-travel-mitd.onrender.com/api/favorites", { tourId }, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setFavorites((prevFavorites) => [...prevFavorites, tourId]);

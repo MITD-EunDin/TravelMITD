@@ -18,7 +18,7 @@ const PaymentsPage = () => {
                 throw new Error("Chưa đăng nhập");
             }
 
-            const response = await fetch("http://localhost:8080/payment/all", {
+            const response = await fetch("https://be-travel-mitd.onrender.com/payment/all", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

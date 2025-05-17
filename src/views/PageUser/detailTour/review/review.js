@@ -32,7 +32,7 @@ const ReviewTour = ({ tour }) => {
                 if (!tour?.tourId) {
                     throw new Error("Tour ID không hợp lệ");
                 }
-                const response = await axios.get(`http://localhost:8080/reviews/${tour.tourId}?limit=10`);
+                const response = await axios.get(`https://be-travel-mitd.onrender.com/reviews/${tour.tourId}?limit=10`);
                 const reviewData = response.data.result;
                 console.log("Reviews fetched in ReviewTour:", reviewData);
                 setReviews(reviewData);
@@ -103,7 +103,7 @@ const ReviewTour = ({ tour }) => {
         try {
             console.log("Submitting new review:", newReview);
             const response = await axios.post(
-                `http://localhost:8080/reviews/${tour.tourId}`,
+                `https://be-travel-mitd.onrender.com/reviews/${tour.tourId}`,
                 newReview,
                 {
                     headers: {

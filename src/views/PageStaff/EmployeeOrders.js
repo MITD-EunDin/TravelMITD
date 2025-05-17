@@ -15,7 +15,7 @@ const EmployeeOrders = () => {
     const fetchOrders = async () => {
         try {
             if (!token) throw new Error("Chưa đăng nhập");
-            const response = await fetch("http://localhost:8080/employee/orders", {
+            const response = await fetch("https://be-travel-mitd.onrender.com/employee/orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!response.ok) throw new Error("Không thể lấy danh sách đơn hàng");
@@ -32,7 +32,7 @@ const EmployeeOrders = () => {
 
     const updateOrderStatus = async (orderId, status) => {
         try {
-            const response = await fetch(`http://localhost:8080/employee/orders/${orderId}/status`, {
+            const response = await fetch(`https://be-travel-mitd.onrender.com/employee/orders/${orderId}/status`, {
                 method: "PATCH",
                 headers: {
                     Authorization: `Bearer ${token}`,

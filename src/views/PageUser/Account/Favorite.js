@@ -22,7 +22,7 @@ const Favorites = () => {
                 return;
             }
             try {
-                const response = await axios.get("http://localhost:8080/api/favorites", {
+                const response = await axios.get("https://be-travel-mitd.onrender.com/api/favorites", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setFavorites(response.data || []);
@@ -43,7 +43,7 @@ const Favorites = () => {
     // Xóa tour khỏi yêu thích
     const removeFavorite = async (tourId) => {
         try {
-            await axios.delete(`http://localhost:8080/api/favorites/${tourId}`, {
+            await axios.delete(`https://be-travel-mitd.onrender.com/api/favorites/${tourId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== tourId));

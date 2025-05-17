@@ -23,7 +23,7 @@ const InvoiceDetail = () => {
                 if (!bookingId || bookingId === 'undefined') {
                     throw new Error('Mã booking không hợp lệ');
                 }
-                const response = await fetch(`http://localhost:8080/payment/${bookingId}`, {
+                const response = await fetch(`https://be-travel-mitd.onrender.com/payment/${bookingId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

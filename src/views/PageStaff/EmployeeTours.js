@@ -14,7 +14,7 @@ const EmployeeTours = () => {
     const fetchTours = async () => {
         try {
             if (!token) throw new Error("Chưa đăng nhập");
-            const response = await fetch("http://localhost:8080/employee/tours", {
+            const response = await fetch("https://be-travel-mitd.onrender.com/employee/tours", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!response.ok) throw new Error("Không thể lấy danh sách tour");

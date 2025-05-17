@@ -21,7 +21,7 @@ export function ReviewsPage() {
 
         const fetchReviews = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/reviews/all?page=0&limit=10", {
+                const response = await axios.get("https://be-travel-mitd.onrender.com/reviews/all?page=0&limit=10", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

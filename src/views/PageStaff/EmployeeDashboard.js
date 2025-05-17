@@ -16,7 +16,7 @@ const EmployeeDashboard = () => {
         const fetchPerformance = async () => {
             try {
                 if (!token) throw new Error("Chưa đăng nhập");
-                const response = await fetch("http://localhost:8080/employee/performance", {
+                const response = await fetch("https://be-travel-mitd.onrender.com/employee/performance", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!response.ok) throw new Error("Không thể lấy số liệu hiệu suất");
