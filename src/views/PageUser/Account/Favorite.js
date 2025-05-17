@@ -76,7 +76,7 @@ const Favorites = () => {
                             className="p-4 rounded-lg border relative"
                         >
                             <img
-                                src={tour.image}
+                                src={tour.images[0]}
                                 alt={tour.tourName}
                                 className="w-full h-40 object-cover mb-2 rounded-lg"
                             />
