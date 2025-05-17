@@ -25,7 +25,7 @@ const Overview = () => {
     const fetchPayments = async () => {
         try {
             if (!token) throw new Error("Chưa đăng nhập hoặc không có quyền admin");
-            const response = await fetch("http://localhost:8080/payment/all", {
+            const response = await fetch("https://be-travel-mitd.onrender.com/payment/all", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!response.ok) throw new Error("Không thể lấy dữ liệu thanh toán");
