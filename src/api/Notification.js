@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Địa chỉ base URL của backend
-const API_URL = 'http://localhost:8080';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 // Tạo instance của axios với cấu hình mặc định
 const api = axios.create({
@@ -96,10 +96,10 @@ export const createDiscountNotification = async (notificationData, token) => {
     }
 };
 
-// Hàm kết nối WebSocket để nhận thông báo thời gian thực
+// Hàm kết nối WebSocket
 export const connectWebSocket = (userId, onMessage) => {
     console.log('Connecting WebSocket for userId:', userId);
-    const ws = new WebSocket(`${API_URL.replace('http', 'ws')}/ws/notifications?userId=${userId}`);
+    const ws = new WebSocket(`${API_URL.replace('http', 'ws').replace('https', 'wss')}/ws/notifications?userId=${userId}`);
     ws.onmessage = (event) => {
         try {
             const notification = JSON.parse(event.data);
@@ -112,7 +112,7 @@ export const connectWebSocket = (userId, onMessage) => {
     ws.onopen = () => console.log('WebSocket connected');
     ws.onclose = () => {
         console.log('WebSocket disconnected, attempting to reconnect...');
-        setTimeout(() => connectWebSocket(userId, onMessage), 5000); // Thử lại sau 5s
+        setTimeout(() => connectWebSocket(userId, onMessage), 5000);
     };
     ws.onerror = (error) => console.error('WebSocket error:', error);
     return ws;

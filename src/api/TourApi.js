@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getTokenFromStorage } from '../utils/auth';
 
-const BASE_URL = 'http://localhost:8080/tours';
+const BASE_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/tours`;
 
 const getAuthHeaders = () => {
   const token = getTokenFromStorage();
