@@ -202,3 +202,41 @@ $theme-color : ("main" : #071635,
     }
   }
 }
+
+.payment-options-container {
+  display: flex;
+  flex-direction: column;
+  /* Mỗi tùy chọn thanh toán là một hàng riêng */
+  gap: 12px;
+  /* Khoảng cách giữa các tùy chọn */
+}
+
+/* Mỗi tùy chọn thanh toán */
+.payment-option {
+  display: flex;
+  align-items: center;
+  /* Căn giữa theo chiều dọc */
+  gap: 8px;
+  /* Khoảng cách giữa radio, ảnh, và văn bản */
+  cursor: pointer;
+}
+
+/* Radio button */
+.payment-option input[type="radio"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Ảnh biểu tượng */
+.payment-option .payment-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Văn bản nhãn */
+.payment-option span {
+  font-size: 14px;
+  color: #333;
+}

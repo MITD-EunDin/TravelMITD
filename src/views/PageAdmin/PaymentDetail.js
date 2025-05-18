@@ -40,7 +40,7 @@ const PaymentDetailPage = () => {
                 if (!token) {
                     throw new Error("Không tìm thấy token đăng nhập");
                 }
-                const response = await fetch(`http://localhost:8080/payment/${bookingId}`, {
+                const response = await fetch(`https://be-travel-mitd.onrender.com/payment/${bookingId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!response.ok) throw new Error("Không thể lấy chi tiết giao dịch");
@@ -86,7 +86,7 @@ const PaymentDetailPage = () => {
     const handleCreateRemainingPayment = async () => {
         try {
             const response = await fetch(
-                `http://localhost:8080/payment/vnpay-url?bookingId=${payment.bookingId}&amount=${payment.remainingAmount}`,
+                `https://be-travel-mitd.onrender.com/payment/vnpay-url?bookingId=${payment.bookingId}&amount=${payment.remainingAmount}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

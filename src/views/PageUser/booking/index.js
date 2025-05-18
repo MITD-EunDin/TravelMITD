@@ -6,6 +6,10 @@ import { getMyInfo } from "../../../api/Api";
 import { bookTour, makePayment, getVnpayUrl } from '../../../api/BookingApi';
 import { Spin, Alert, Button, InputNumber, Radio, message } from 'antd';
 import bookdetail from '../../../assets/bookdetail.png';
+import vnpayLogo from '../../../assets/logovnpay.png';
+import bankingicon from '../../../assets/banking.png';
+import officeicon from '../../../assets/officeicon.png'
+
 const Booking = () => {
     const location = useLocation();
     const tour = location.state?.tour;
@@ -28,10 +32,9 @@ const Booking = () => {
     const [tourScheduleId, setTourScheduleId] = useState(tour?.tourSchedules?.[0]?.id || '');
 
     const paymentOptions = [
-        { id: 'vnpay', label: 'VNPAY (ATM, Visa, QR Code)', icon: '/vnpay-logo.png' },
-        { id: 'momo', label: 'MOMO', icon: '/momo-logo.png' },
-        { id: 'bank', label: 'Chuyển khoản ngân hàng', icon: '/bank-icon.png' },
-        { id: 'office', label: 'Thanh toán tại văn phòng', icon: '/office-icon.png' },
+        { id: 'vnpay', label: 'VNPAY (ATM, Visa, QR Code)', icon: vnpayLogo },
+        { id: 'bank', label: 'Chuyển khoản ngân hàng', icon: bankingicon },
+        { id: 'office', label: 'Thanh toán tại văn phòng', icon: officeicon },
     ];
 
     const [userInfo, setUserInfo] = useState({
@@ -340,19 +343,20 @@ const Booking = () => {
                         </div>
                         <div>
                             <h4>Chọn phương thức thanh toán</h4>
-                            {paymentOptions.map((option) => (
-                                <label key={option.id} className="payment-option">
-                                    <span>
+                            <div className="payment-options-container">
+                                {paymentOptions.map((option) => (
+                                    <label key={option.id} className="payment-option">
                                         <input
                                             type="radio"
                                             name="payment"
                                             checked={selectedMethod === option.id}
                                             onChange={() => setSelectedMethod(option.id)}
                                         />
-                                    </span>
-                                    <img src={option.icon} alt={option.label} />
-                                </label>
-                            ))}
+                                        <img src={option.icon} alt={option.label} className="payment-icon" />
+                                        <span>{option.label}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                         <div>
                             <h4>Chọn loại thanh toán</h4>

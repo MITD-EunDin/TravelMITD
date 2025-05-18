@@ -407,13 +407,6 @@ const MainPage = () => {
                 {/* <TourFilter onFilterChange={setFilter} />
                 <TourSection title="Các Tour Hấp Dẫn" tours={tours} /> */}
                 <TourSection title="Tour Giảm Giá Hấp Dẫn 🔥" tours={discountTours} isDiscount />
-                <div className="flex justify-center mt-6">
-                    <Link to="/tours?filter=discount">
-                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-                            Xem thêm
-                        </button>
-                    </Link>
-                </div>
             </div>
             <CustomerReviews />
             <section className="max-w-screen-xl mx-auto p-4">
@@ -438,7 +431,7 @@ const MainPage = () => {
                     <ArrowUp size={24} />
                 </button>
             )}
-            <ChatBox/>
+            <ChatBox />
         </div>
     );
 };

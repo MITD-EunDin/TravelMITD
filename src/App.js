@@ -1,6 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
+import { ToastContainer, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import LoginForm from "./views/FormLog/Login";
 import SignupForm from "./views/FormLog/signup";
 import ResetPassword from "./views/FormLog/ResetPassword";
@@ -27,6 +30,7 @@ import EmployeeOrders from "./views/PageStaff/EmployeeOrders";
 import EmployeeProfile from "./views/PageStaff/EmployeeProfile";
 import EmployeeTours from "./views/PageStaff/EmployeeTours";
 import EmployeeNotifications from "./views/PageStaff/EmployeeNotifications";
+import EmployeeOrderDetail from "./views/PageStaff/EmployeeOrderDetail";
 
 
 import Booking from "./views/PageUser/booking";
@@ -99,11 +103,25 @@ function App() {
               <Route path="tours" element={<EmployeeTours />} />
               <Route path="notifications" element={<EmployeeNotifications />} />
               <Route path="profile" element={<EmployeeProfile />} />
+              <Route path="orders/:id" element={<EmployeeOrderDetail />} />
             </Route>
 
             {/* Chuyển hướng về trang chủ nếu đường dẫn không hợp lệ */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
         </Router>
       </ToursProvider>
     </AuthProvider>

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FaUserCircle } from "react-icons/fa";
 import { useAuth } from "../../Contexts/AuthContext";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logodtc from "../../assets/logoDTC.png";
+import CryptoJS from 'crypto-js';
 
 export function FloatingInput({
     type = "text",
@@ -45,7 +45,7 @@ export function FloatingInput({
 
 export default function LoginForm() {
     const { login, loginWithGoogle, resetPassword, user } = useAuth();
-    const [username, setUsername] = useState("");
+    const [usernameOrEmail, setUsernameOrEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState("");
@@ -53,8 +53,38 @@ export default function LoginForm() {
     const [showResetPassword, setShowResetPassword] = useState(false);
     const [resetEmail, setResetEmail] = useState("");
     const [resetMessage, setResetMessage] = useState("");
-
     const navigate = useNavigate();
+
+    // Khóa bí mật để mã hóa (lưu trong biến môi trường cho production)
+    const SECRET_KEY = process.env.REACT_APP_CRYPTO_SECRET || 'your-secret-key-123';
+
+    // Load thông tin đã lưu khi component mount
+    useEffect(() => {
+        const savedCredentials = localStorage.getItem('savedCredentials');
+        if (savedCredentials) {
+            try {
+                const decrypted = CryptoJS.AES.decrypt(savedCredentials, SECRET_KEY).toString(CryptoJS.enc.Utf8);
+                const { usernameOrEmail, password } = JSON.parse(decrypted);
+                setUsernameOrEmail(usernameOrEmail || "");
+                setPassword(password || "");
+                setRememberMe(true);
+            } catch (err) {
+                console.error("Lỗi giải mã thông tin đăng nhập:", err);
+                localStorage.removeItem('savedCredentials');
+            }
+        }
+    }, []);
+
+    // Xử lý thay đổi checkbox "Nhớ mật khẩu"
+    const handleRememberMeChange = (e) => {
+        const checked = e.target.checked;
+        setRememberMe(checked);
+        if (!checked) {
+            localStorage.removeItem('savedCredentials');
+            setUsernameOrEmail("");
+            setPassword("");
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -62,9 +92,18 @@ export default function LoginForm() {
         setLoading(true);
 
         try {
-            const scope = await login(username, password);
+            const scope = await login(usernameOrEmail, password);
             console.log("LoginForm - Phạm vi trả về từ đăng nhập:", scope);
             if (scope) {
+                // Lưu thông tin nếu chọn "Nhớ mật khẩu"
+                if (rememberMe) {
+                    const credentials = JSON.stringify({ usernameOrEmail, password });
+                    const encrypted = CryptoJS.AES.encrypt(credentials, SECRET_KEY).toString();
+                    localStorage.setItem('savedCredentials', encrypted);
+                } else {
+                    localStorage.removeItem('savedCredentials');
+                }
+
                 console.log("LoginForm - Đăng nhập thành công, đang chuyển hướng với phạm vi:", scope);
                 toast.success("Đăng nhập thành công!");
                 if (scope === "STAFF") {
@@ -94,6 +133,8 @@ export default function LoginForm() {
             const scope = await loginWithGoogle();
             console.log("LoginForm - Phạm vi Google:", scope);
             if (scope) {
+                // Xóa thông tin đã lưu khi đăng nhập Google
+                localStorage.removeItem('savedCredentials');
                 toast.success("Đăng nhập Google thành công!");
                 if (scope === "STAFF") {
                     navigate("/employee/dashboard");
@@ -162,9 +203,9 @@ export default function LoginForm() {
                     <>
                         <form onSubmit={handleSubmit}>
                             <FloatingInput
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                label="Tên người dùng"
+                                value={usernameOrEmail}
+                                onChange={(e) => setUsernameOrEmail(e.target.value)}
+                                label="Tên người dùng hoặc Email"
                                 required
                             />
                             <FloatingInput
@@ -179,7 +220,7 @@ export default function LoginForm() {
                                     <input
                                         type="checkbox"
                                         checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                        onChange={handleRememberMeChange}
                                         className="mr-2"
                                     />
                                     Nhớ mật khẩu
@@ -220,7 +261,7 @@ export default function LoginForm() {
                 ) : (
                     <form onSubmit={handleResetPassword}>
                         <FloatingInput
-                            type="email"
+                            type="text"
                             value={resetEmail}
                             onChange={(e) => setResetEmail(e.target.value)}
                             label="Email"

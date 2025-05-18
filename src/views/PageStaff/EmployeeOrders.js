@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Search } from "lucide-react";
 import { useAuth } from "../../Contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const EmployeeOrders = () => {
     const { token } = useAuth();
@@ -12,13 +13,18 @@ const EmployeeOrders = () => {
     const [filter, setFilter] = useState("all");
     const [search, setSearch] = useState("");
 
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
     const fetchOrders = async () => {
         try {
             if (!token) throw new Error("Chưa đăng nhập");
-            const response = await fetch("https://be-travel-mitd.onrender.com/employee/orders", {
+            const response = await fetch(`${API_URL}/employee/orders`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (!response.ok) throw new Error("Không thể lấy danh sách đơn hàng");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Không thể lấy danh sách đơn hàng");
+            }
             const data = await response.json();
             console.log("EmployeeOrders - API response:", data);
             setOrders(data.result || []);
@@ -26,25 +32,30 @@ const EmployeeOrders = () => {
             setLoading(false);
         } catch (err) {
             setError(err.message);
+            toast.error(err.message);
             setLoading(false);
         }
     };
 
     const updateOrderStatus = async (orderId, status) => {
         try {
-            const response = await fetch(`https://be-travel-mitd.onrender.com/employee/orders/${orderId}/status`, {
+            const response = await fetch(`${API_URL}/employee/orders/${orderId}/status`, {
                 method: "PATCH",
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(status),
+                body: JSON.stringify({ status }),
             });
-            if (!response.ok) throw new Error("Cập nhật trạng thái thất bại");
-            alert("Cập nhật trạng thái thành công!");
-            fetchOrders(); // Tải lại danh sách
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Cập nhật trạng thái thất bại");
+            }
+            toast.success("Cập nhật trạng thái thành công!");
+            fetchOrders();
         } catch (err) {
             setError(err.message);
+            toast.error(err.message);
         }
     };
 
@@ -71,9 +82,9 @@ const EmployeeOrders = () => {
         switch (status.toLowerCase()) {
             case "paid":
                 return "text-green-600";
-            case "pending":
+            case "deposited":
                 return "text-yellow-500";
-            case "cancelled":
+            case "pending":
                 return "text-red-600";
             default:
                 return "text-gray-600";
@@ -127,9 +138,9 @@ const EmployeeOrders = () => {
                         className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="all">Tất cả</option>
-                        <option value="paid">Thành công</option>
-                        <option value="pending">Đang chờ</option>
-                        <option value="cancelled">Đã hủy</option>
+                        <option value="paid">Đã thanh toán</option>
+                        <option value="deposited">Đã đặt cọc</option>
+                        <option value="pending">Chờ xử lý</option>
                     </select>
                 </div>
                 {filteredOrders.length === 0 ? (
@@ -138,9 +149,9 @@ const EmployeeOrders = () => {
                     <table className="w-full table-fixed border-collapse">
                         <thead>
                             <tr className="bg-gray-100 text-left">
-                                <th className="p-3 border-b w-1/6">Mã Đơn</th>
+                                <th className="p-3 border-b w-1/12">Mã Đơn</th>
                                 <th className="p-3 border-b w-1/6">Khách Hàng</th>
-                                <th className="p-3 border-b w-1/6">Tour</th>
+                                <th className="p-3 border-b w-1/4">Tour</th>
                                 <th className="p-3 border-b w-1/6">Số Tiền</th>
                                 <th className="p-3 border-b w-1/6">Trạng Thái</th>
                                 <th className="p-3 border-b w-1/6">Ngày</th>
@@ -151,11 +162,11 @@ const EmployeeOrders = () => {
                             {filteredOrders.map((order) => (
                                 <tr key={order.orderId} className="border-b hover:bg-gray-50">
                                     <td className="p-3 whitespace-nowrap text-left">{order.orderId}</td>
-                                    <td className="p-3 whitespace-nowrap text-left">{order.customerName}</td>
-                                    <td className="p-3 whitespace-nowrap text-left">{order.tourName}</td>
+                                    <td className="p-3 text-left overflow-hidden text-ellipsis whitespace-nowrap">{order.customerName}</td>
+                                    <td className="p-3 text-left overflow-hidden text-ellipsis whitespace-nowrap">{order.tourName}</td>
                                     <td className="p-3 whitespace-nowrap text-left">{order.amount.toLocaleString()} VND</td>
                                     <td className={`p-3 whitespace-nowrap text-left ${getStatusColor(order.status)}`}>
-                                        {order.status === "PAID" ? "Thành công" : order.status === "PENDING" ? "Đang chờ" : "Đã hủy"}
+                                        {order.status === "PAID" ? "Đã thanh toán" : order.status === "DEPOSITED" ? "Đã đặt cọc" : "Chờ xử lý"}
                                     </td>
                                     <td className="p-3 whitespace-nowrap text-left">
                                         {order.orderDate ? new Date(order.orderDate).toLocaleDateString("vi-VN") : "N/A"}
@@ -166,14 +177,6 @@ const EmployeeOrders = () => {
                                                 Chi tiết
                                             </button>
                                         </Link>
-                                        {order.status !== "PAID" && order.status !== "CANCELLED" && (
-                                            <button
-                                                onClick={() => updateOrderStatus(order.orderId, "PAID")}
-                                                className="ml-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                            >
-                                                Xác nhận thanh toán
-                                            </button>
-                                        )}
                                     </td>
                                 </tr>
                             ))}

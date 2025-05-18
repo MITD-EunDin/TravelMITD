@@ -1,16 +1,46 @@
-import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Descriptions, Card, Button, Tag } from "antd";
+import { useAuth } from "../../Contexts/AuthContext";
+import { toast } from "react-toastify";
+import { getBookingById } from "../../api/BookingApi";
 
-const OrderDetail = () => {
-    const location = useLocation();
+const EmployeeOrderDetail = () => {
+    const { id } = useParams();
+    const { token } = useAuth();
     const navigate = useNavigate();
-    const booking = location.state?.booking;
+    const [booking, setBooking] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    if (!booking) {
+    useEffect(() => {
+        const fetchBooking = async () => {
+            try {
+                if (!token) throw new Error("Chưa đăng nhập");
+                const bookingData = await getBookingById(id);
+                setBooking(bookingData);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message || "Không thể lấy chi tiết đơn hàng");
+                toast.error(err.message || "Không thể lấy chi tiết đơn hàng");
+                setLoading(false);
+            }
+        };
+        fetchBooking();
+    }, [id, token]);
+
+    if (loading) {
         return (
             <div style={{ padding: "24px", textAlign: "center" }}>
-                <p style={{ color: "red" }}>Không tìm thấy đơn hàng. Vui lòng quay lại danh sách đơn hàng.</p>
+                <p>Đang tải chi tiết đơn hàng...</p>
+            </div>
+        );
+    }
+
+    if (error || !booking) {
+        return (
+            <div style={{ padding: "24px", textAlign: "center" }}>
+                <p style={{ color: "red" }}>{error || "Không tìm thấy đơn hàng. Vui lòng quay lại danh sách đơn hàng."}</p>
                 <Button type="primary" onClick={() => navigate(-1)}>
                     Quay lại
                 </Button>
@@ -58,4 +88,4 @@ const OrderDetail = () => {
     );
 };
 
-export default OrderDetail;
+export default EmployeeOrderDetail;

@@ -34,7 +34,7 @@ export const ToursProvider = ({ children }) => {
                     toursWithRating.map(async (tour) => {
                         try {
                             const response = await axios.get(
-                                `http://localhost:8080/reviews/${tour.tourId}`,
+                                `https://be-travel-mitd.onrender.com/reviews/${tour.tourId}`,
                                 {
                                     params: { limit: 10 },
                                     headers: {
@@ -100,7 +100,7 @@ export const ToursProvider = ({ children }) => {
         try {
             const token = localStorage.getItem("token");
             // Gửi đánh giá mới
-            const response = await axios.post(`http://localhost:8080/reviews/${tourId}`, reviewData, {
+            const response = await axios.post(`https://be-travel-mitd.onrender.com/reviews/${tourId}`, reviewData, {
                 headers: {
                     Authorization: token ? `Bearer ${token}` : undefined,
                 },
@@ -108,7 +108,7 @@ export const ToursProvider = ({ children }) => {
             console.log("Review created:", response.data.result);
 
             // Lấy lại danh sách đánh giá để tính averageRating mới
-            const reviewsResponse = await axios.get(`http://localhost:8080/reviews/${tourId}`, {
+            const reviewsResponse = await axios.get(`https://be-travel-mitd.onrender.com/reviews/${tourId}`, {
                 params: { limit: 10 },
                 headers: {
                     Authorization: token ? `Bearer ${token}` : undefined,

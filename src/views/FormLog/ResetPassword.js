@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { updatePasswordApi, getMyInfo } from "../../api/Api";
 import { getAuth, verifyPasswordResetCode, confirmPasswordReset } from "firebase/auth";
-import { getTokenFromStorage } from "../../utils/auth";
+import { toast } from "react-toastify";
+import { updatePasswordApi } from "../../api/Api";
 
 const FloatingInput = ({ type = "text", label, value, onChange, required = false, ...props }) => {
     const id = label.toLowerCase().replace(/\s+/g, "-");
@@ -37,6 +37,8 @@ const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState(""); // Lưu email từ verifyPasswordResetCode
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -50,6 +52,9 @@ const ResetPassword = () => {
 
         const auth = getAuth();
         verifyPasswordResetCode(auth, oobCode)
+            .then((userEmail) => {
+                setEmail(userEmail); // Lưu email để đồng bộ mật khẩu
+            })
             .catch((error) => {
                 if (error.code === "auth/invalid-action-code") {
                     setError("Liên kết đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu đặt lại mật khẩu lần nữa.");
@@ -63,6 +68,7 @@ const ResetPassword = () => {
         e.preventDefault();
         setError("");
         setSuccess("");
+        setLoading(true);
 
         const urlParams = new URLSearchParams(window.location.search);
         const oobCode = urlParams.get("oobCode");
@@ -71,27 +77,30 @@ const ResetPassword = () => {
             const auth = getAuth();
             await confirmPasswordReset(auth, oobCode, newPassword);
 
-            // Đồng bộ mật khẩu với backend nếu có token
-            const token = getTokenFromStorage();
-            if (token) {
-                const userInfo = await getMyInfo(token);
-                if (userInfo && userInfo.id) {
-                    await updatePasswordApi(userInfo.id, newPassword);
-                    console.log("Mật khẩu đã được đồng bộ với backend cho người dùng:", userInfo.id);
-                }
-            } else {
-                console.warn("Không có token. Mật khẩu đã được đổi trong Firebase, nhưng chưa đồng bộ với backend. Vui lòng đăng nhập lại.");
+            if (!email) {
+                throw new Error("Không tìm thấy email để đồng bộ mật khẩu.");
             }
 
-            setSuccess("Đổi mật khẩu thành công! Vui lòng đăng nhập lại để đồng bộ mật khẩu với hệ thống.");
+            // Đồng bộ mật khẩu với backend ngay lập tức
+            await updatePasswordApi(email, newPassword);
+            console.log("Mật khẩu đã được đồng bộ với backend cho email:", email);
+
+            setSuccess("Đặt lại mật khẩu thành công! Vui lòng đăng nhập để tiếp tục.");
+            toast.success("Đặt lại mật khẩu thành công! Vui lòng đăng nhập để tiếp tục.");
             setTimeout(() => navigate("/login"), 3000);
         } catch (error) {
             console.error("Lỗi khi đổi mật khẩu:", error);
             if (error.code === "auth/invalid-action-code") {
                 setError("Liên kết đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu đặt lại mật khẩu lần nữa.");
+            } else if (error.message.includes("USER_NOT_EXISTED")) {
+                setError("Email không tồn tại trong hệ thống. Vui lòng kiểm tra lại.");
+            } else if (error.message.includes("INVALID_EMAIL")) {
+                setError("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
             } else {
                 setError("Lỗi khi đổi mật khẩu: " + error.message);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -111,9 +120,10 @@ const ResetPassword = () => {
                     />
                     <button
                         type="submit"
-                        className="w-full py-2 rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition duration-200 mt-4"
+                        disabled={loading}
+                        className={`w-full py-2 rounded-lg text-white transition duration-200 ${loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"} mt-4`}
                     >
-                        Đổi mật khẩu
+                        {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
                     </button>
                 </form>
             </div>

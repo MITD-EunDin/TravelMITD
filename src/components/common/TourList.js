@@ -10,8 +10,9 @@ const TourList = ({ tours }) => {
                     <img src={tour.images[0]} alt={tour.tourName} className="w-full h-40 object-cover rounded-md" />
 
                     <h2 className="text-xl font-semibold mt-2 group-hover:text-blue-500 group-hover:-translate-y-2 line-clamp-2">{tour.tourName}</h2>
-                    <p className="text-gray-600 group-hover:-translate-y-2">{tour.tourType}</p>
-
+                    <p className="text-gray-600 group-hover:-translate-y-2">
+                        {tour.tourType === "DOMESTIC" ? "Trong nước" : "Quốc tế"}
+                    </p>
                     <div className="rounded-lg w-full max-w-md flex flex-col group-hover:-translate-y-2">
                         <div className="flex justify-between items-center">
                             <div className="flex flex-col text-sm text-gray-700 gap-2">
@@ -41,7 +42,7 @@ const TourList = ({ tours }) => {
                                 )}
                                 <Link to={`/tours/${tour.tourId}`} state={{ tour }}>
                                     <button className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-                                        Xem Chi Tiết
+                                        Chi Tiết
                                     </button>
                                 </Link>
                             </div>

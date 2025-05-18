@@ -59,6 +59,18 @@ export const getMyBookings = async () => {
     }
 };
 
+export const getBookingById = async (bookingId) => {
+    try {
+        console.log('Fetching booking by ID:', bookingId);
+        const response = await API.get(`/tour_booking/${bookingId}`);
+        console.log('Booking by ID response:', response.data);
+        return response.data.result;
+    } catch (error) {
+        console.error('Error fetching booking by ID:', error.response?.data || error.message);
+        throw error.response?.data || error;
+    }
+};
+
 export const makePayment = async (paymentData) => {
     try {
         console.log('Making payment:', paymentData);

@@ -107,16 +107,22 @@ export const loginWithGoogleApi = async (idToken) => {
     return response.data; // Trả về { token, authenticated }
 };
 
-export const updatePasswordApi = async (id, newPassword) => {
+export const updatePasswordApi = async (email, newPassword) => {
     try {
-        const response = await api.post('/auth/update-password', null, {
-            params: { id, newPassword }
+        const response = await api.post('/auth/update-password', {
+            email,
+            newPassword
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         return response.data;
     } catch (error) {
-        console.error("Update password API error:", error.response?.data || error.message);
-        throw error;
+        throw new Error(error.response?.data?.message || error.message);
     }
 };
+
+
 
 export default api;
