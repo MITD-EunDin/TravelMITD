@@ -9,49 +9,36 @@ const RSSNews = ({ limit = Infinity }) => {
     const rssSources = [
         "https://vnexpress.net/rss/du-lich.rss",
         "https://thanhnien.vn/rss/du-lich.rss",
-        "https://tuoitre.vn/rss/du-lich.rss",
+        "https://tuoitre.vn/rss/du-lich.rss"
     ];
 
-    const fetchRSS = async (url, retries = 3, timeout = 60000) => {
-        for (let i = 0; i < retries; i++) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-            try {
-                console.log(`Bắt đầu fetch ${url}: ${new Date().toISOString()}`);
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl, {
-                    mode: "cors",
-                    signal: controller.signal,
-                });
-                clearTimeout(timeoutId);
-
-                if (!response.ok) {
-                    throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                const items = Array.from(xmlDoc.querySelectorAll("item")).map((item) => ({
-                    title: item.querySelector("title")?.textContent || "Không có tiêu đề",
-                    description:
-                        item.querySelector("description")?.textContent?.replace(/<[^>]+>/g, "") ||
-                        "Không có mô tả",
-                    link: item.querySelector("link")?.textContent || "#",
-                    pubDate: item.querySelector("pubDate")?.textContent || new Date().toISOString(),
-                    thumbnail:
-                        item.querySelector("enclosure")?.getAttribute("url") ||
-                        item.querySelector("description")?.textContent.match(/src="([^"]+)"/)?.[1] ||
-                        "",
-                }));
-                return items;
-            } catch (err) {
-                console.warn(`Thử lại fetch cho ${url}. Số lần thử còn lại: ${retries - i - 1}`);
-                if (i === retries - 1) {
-                    throw new Error(`Không thể lấy RSS từ ${url}: ${err.message}`);
-                }
+    const fetchRSS = async (url, retries = 2) => {
+        try {
+            // Sử dụng allorigins.win làm proxy để tránh CORS
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl, { mode: 'cors' });
+            if (!response.ok) {
+                throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
             }
+            const data = await response.json();
+            // Phân tích XML thủ công
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+            const items = Array.from(xmlDoc.querySelectorAll("item")).map(item => ({
+                title: item.querySelector("title")?.textContent || "Không có tiêu đề",
+                description: item.querySelector("description")?.textContent?.replace(/<[^>]+>/g, '') || "Không có mô tả",
+                link: item.querySelector("link")?.textContent || "#",
+                pubDate: item.querySelector("pubDate")?.textContent || new Date().toISOString(),
+                thumbnail: item.querySelector("enclosure")?.getAttribute("url") ||
+                    (item.querySelector("description")?.textContent.match(/src="([^"]+)"/)?.[1]) || ""
+            }));
+            return items;
+        } catch (err) {
+            if (retries > 0) {
+                console.warn(`Thử lại fetch cho ${url}. Số lần thử còn lại: ${retries}`);
+                return fetchRSS(url, retries - 1);
+            }
+            throw err;
         }
     };
 
@@ -60,34 +47,19 @@ const RSSNews = ({ limit = Infinity }) => {
             setLoading(true);
             setError(null);
 
-            try {
-                // Lấy RSS từ tất cả nguồn đồng thời
-                const results = await Promise.allSettled(rssSources.map((url) => fetchRSS(url)));
-                const allItems = [];
-
-                results.forEach((result, index) => {
-                    if (result.status === "fulfilled") {
-                        allItems.push(...result.value);
-                    } else {
-                        console.error(`Lỗi từ nguồn ${rssSources[index]}: ${result.reason.message}`);
-                    }
-                });
-
-                // Sắp xếp theo ngày giảm dần và giới hạn số bài
-                const sortedItems = allItems
-                    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-                    .slice(0, limit);
-
-                if (sortedItems.length === 0) {
-                    throw new Error("Không có tin tức nào được lấy từ các nguồn RSS.");
+            for (const rssUrl of rssSources) {
+                try {
+                    const items = await fetchRSS(rssUrl);
+                    setNews(items.slice(0, limit)); // Giới hạn số bài viết
+                    setLoading(false);
+                    return;
+                } catch (err) {
+                    console.error(`Không thể lấy RSS từ ${rssUrl}:`, err.message);
                 }
-
-                setNews(sortedItems);
-                setLoading(false);
-            } catch (err) {
-                setError("Không thể lấy tin tức từ các nguồn RSS. Vui lòng thử lại sau.");
-                setLoading(false);
             }
+
+            setError("Không thể lấy tin tức từ các nguồn RSS. Vui lòng thử lại sau.");
+            setLoading(false);
         };
 
         tryFetchRSS();
@@ -130,7 +102,7 @@ const RSSNews = ({ limit = Infinity }) => {
                                 src={item.thumbnail}
                                 alt={item.title}
                                 className="w-full h-48 object-cover rounded-md mb-2"
-                                onError={(e) => (e.target.style.display = "none")}
+                                onError={(e) => (e.target.style.display = 'none')}
                             />
                         )}
                         <h3 className="text-xl font-semibold mb-2 text-gray-800">{item.title}</h3>
